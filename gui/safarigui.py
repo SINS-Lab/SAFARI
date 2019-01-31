@@ -475,62 +475,57 @@ def makeDIVSPopup(safari, layout, label, text, name, subindex):
         
         temp = QHBoxLayout()
         label = QLabel('NUMCHA')
-        text = QLineEdit()
+        textn = QLineEdit(str(safari.NUMCHA))
         def edit():
-            safari.NUMCHA = parseVar(text.displayText())
+            safari.NUMCHA = parseVar(textn.displayText())
             safari.save()
-        text = QLineEdit(str(safari.NUMCHA))
-        text.editingFinished.connect(edit)
+        textn.editingFinished.connect(edit)
         temp.addWidget(label)
-        temp.addWidget(text)
+        temp.addWidget(textn)
         layout.addLayout(temp, 0, 0)
         
         temp = QHBoxLayout()
         label = QLabel('XSTART')
-        text = QLineEdit()
+        textxa = QLineEdit(str(safari.XSTART))
         def edit():
-            safari.XSTART = parseVar(text.displayText())
+            safari.XSTART = parseVar(textxa.displayText())
             safari.save()
-        text = QLineEdit(str(safari.XSTART))
-        text.editingFinished.connect(edit)
+        textxa.editingFinished.connect(edit)
         temp.addWidget(label)
-        temp.addWidget(text)
+        temp.addWidget(textxa)
         layout.addLayout(temp, 10, 0)
         
         temp = QHBoxLayout()
         label = QLabel('XSTEP')
-        text = QLineEdit()
+        textxf = QLineEdit(str(safari.XSTEP))
         def edit():
-            safari.XSTEP = parseVar(text.displayText())
+            safari.XSTEP = parseVar(textxf.displayText())
             safari.save()
-        text = QLineEdit(str(safari.XSTEP))
-        text.editingFinished.connect(edit)
+        textxf.editingFinished.connect(edit)
         temp.addWidget(label)
-        temp.addWidget(text)
+        temp.addWidget(textxf)
         layout.addLayout(temp, 20, 0)
         
         temp = QHBoxLayout()
         label = QLabel('YSTART')
-        text = QLineEdit()
+        textya = QLineEdit(str(safari.YSTART))
         def edit():
-            safari.YSTART = parseVar(text.displayText())
+            safari.YSTART = parseVar(textya.displayText())
             safari.save()
-        text = QLineEdit(str(safari.YSTART))
-        text.editingFinished.connect(edit)
+        textya.editingFinished.connect(edit)
         temp.addWidget(label)
-        temp.addWidget(text)
+        temp.addWidget(textya)
         layout.addLayout(temp, 30, 0)
         
         temp = QHBoxLayout()
         label = QLabel('YSTEP')
-        text = QLineEdit()
+        textyf = QLineEdit(str(safari.YSTEP))
         def edit():
-            safari.YSTEP = parseVar(text.displayText())
+            safari.YSTEP = parseVar(textyf.displayText())
             safari.save()
-        text = QLineEdit(str(safari.YSTEP))
-        text.editingFinished.connect(edit)
+        textyf.editingFinished.connect(edit)
         temp.addWidget(label)
-        temp.addWidget(text)
+        temp.addWidget(textyf)
         layout.addLayout(temp, 40, 0)
         
         # Button to close the window
@@ -604,13 +599,11 @@ def makePIMPARPopup(safari, layout, label, text, name, subindex):
 def makeNBZPopup(safari, layout, label, text, name, subindex):
     button = QPushButton(name)
     def edit():
-        safari.load()
         subindex = safari.NBZ
         #Set it here so it doesn't get GC'd
-        safari.popup2 = QWidget()
-        window = safari.popup2
+        safari.popup4 = QWidget()
+        window = safari.popup4
         layout = QVBoxLayout()
-        print(subindex)
         table = QTableWidget(2,subindex)
         table.setVerticalHeaderLabels(['NZ:', 'ZMAX'])
         # Populate the table
@@ -638,11 +631,10 @@ def makeNBZPopup(safari, layout, label, text, name, subindex):
 def makeNBGPopup(safari, layout, label, text, name, subindex):
     button = QPushButton(name)
     def edit():
-        safari.load()
         subindex = safari.NBG
         #Set it here so it doesn't get GC'd
-        safari.popup2 = QWidget()
-        window = safari.popup2
+        safari.popup3 = QWidget()
+        window = safari.popup3
         layout = QVBoxLayout()
         print(subindex)
         table = QTableWidget(2,subindex)
@@ -676,12 +668,12 @@ def makeIIMPOTIs2Popup(safari, layout, label, text, name, subindex):
         safari.popup = QWidget()
         window = safari.popup
         layout = QGridLayout()
-        
+        print(safari.NBZ)
         temp = QHBoxLayout()
         label = QLabel('NBZ')
-        text = QLineEdit()
+        textz = QLineEdit(str(safari.NBZ))
         def edit():
-            safari.NBZ = parseVar(text.displayText())
+            safari.NBZ = parseVar(textz.displayText())
             # Pad the array.
             i = len(safari.NZ)
             while i < safari.NBZ:
@@ -689,22 +681,20 @@ def makeIIMPOTIs2Popup(safari, layout, label, text, name, subindex):
                 safari.ZMAX.append(0)
                 i = len(safari.NG)
             safari.save()
-        text = QLineEdit(str(safari.NBZ))
-        text.editingFinished.connect(edit)
+        textz.editingFinished.connect(edit)
         temp.addWidget(label)
-        temp.addWidget(text)
+        temp.addWidget(textz)
         layout.addLayout(temp, 0, 0)
         
         temp = QHBoxLayout()
         label = QLabel('TOL')
-        text = QLineEdit()
+        textt = QLineEdit(str(safari.TOL))
         def edit():
-            safari.TOL = parseVar(text.displayText())
+            safari.TOL = parseVar(textt.displayText())
             safari.save()
-        text = QLineEdit(str(safari.TOL))
-        text.editingFinished.connect(edit)
+        textt.editingFinished.connect(edit)
         temp.addWidget(label)
-        temp.addWidget(text)
+        temp.addWidget(textt)
         layout.addLayout(temp, 10, 0)
 
         # Popup table
@@ -712,9 +702,9 @@ def makeIIMPOTIs2Popup(safari, layout, label, text, name, subindex):
         
         temp = QHBoxLayout()
         label = QLabel('NBG')
-        text = QLineEdit()
+        textg = QLineEdit(str(safari.NBG))
         def edit():
-            safari.NBG = parseVar(text.displayText())
+            safari.NBG = parseVar(textg.displayText())
             # Pad the array.
             i = len(safari.NG)
             while i < safari.NBG:
@@ -722,22 +712,20 @@ def makeIIMPOTIs2Popup(safari, layout, label, text, name, subindex):
                 safari.GMAX.append(0)
                 i = len(safari.NG)
             safari.save()
-        text = QLineEdit(str(safari.NBG))
-        text.editingFinished.connect(edit)
+        textg.editingFinished.connect(edit)
         temp.addWidget(label)
-        temp.addWidget(text)
+        temp.addWidget(textg)
         layout.addLayout(temp, 30, 0)
         
         temp = QHBoxLayout()
         label = QLabel('GTOL')
-        text = QLineEdit()
+        textgt = QLineEdit(str(safari.GTOL))
         def edit():
-            safari.GTOL = parseVar(text.displayText())
+            safari.GTOL = parseVar(textgt.displayText())
             safari.save()
-        text = QLineEdit(str(safari.GTOL))
-        text.editingFinished.connect(edit)
+        textgt.editingFinished.connect(edit)
         temp.addWidget(label)
-        temp.addWidget(text)
+        temp.addWidget(textgt)
         layout.addLayout(temp, 40, 0)
 
         # Popup table
@@ -842,61 +830,61 @@ def makeInputBox(safari, name, index, subindex):
     # First line of the file.
     if index==1:
         if subindex==0:
+            text = QLineEdit(str(safari.E0))
             def edit():
                 safari.E0 = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.E0))
             text.editingFinished.connect(edit)
         if subindex==1:
+            text = QLineEdit(str(safari.THETA0))
             def edit():
                 safari.THETA0 = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.THETA0))
             text.editingFinished.connect(edit)
         if subindex==2:
+            text = QLineEdit(str(safari.PHI0))
             def edit():
                 safari.PHI0 = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.PHI0))
             text.editingFinished.connect(edit)
         if subindex==3:
+            text = QLineEdit(str(safari.MASS))
             def edit():
                 safari.MASS = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.MASS))
             text.editingFinished.connect(edit)
     # Second line of the file
     if index==2:
         if subindex==0:
+            text = QLineEdit(str(safari.EMIN))
             def edit():
                 safari.EMIN = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.EMIN))
             text.editingFinished.connect(edit)
         if subindex==1:
+            text = QLineEdit(str(safari.EMAX))
             def edit():
                 safari.EMAX = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.EMAX))
             text.editingFinished.connect(edit)
         if subindex==2:
+            text = QLineEdit(str(safari.ESIZE))
             def edit():
                 safari.ESIZE = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.ESIZE))
             text.editingFinished.connect(edit)
         if subindex==3:
+            text = QLineEdit(str(safari.ASIZE))
             def edit():
                 safari.ASIZE = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.ASIZE))
             text.editingFinished.connect(edit)
     # Detector type, should be replaced with dropdown list later.
     if index==3:
+        text = QLineEdit(str(safari.NDTECT))
         def edit():
             safari.NDTECT = parseVar(text.displayText())
             safari.save()
-        text = QLineEdit(str(safari.NDTECT))
         text.editingFinished.connect(edit)
     # Parameters for the detector
     if index==4:
@@ -906,101 +894,101 @@ def makeInputBox(safari, name, index, subindex):
     # Time Steps
     if index==5:
         if subindex==0:
+            text = QLineEdit(str(safari.DELLOW))
             def edit():
                 safari.DELLOW = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.DELLOW))
             text.editingFinished.connect(edit)
         if subindex==1:
+            text = QLineEdit(str(safari.DELT0))
             def edit():
                 safari.DELT0 = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.DELT0))
             text.editingFinished.connect(edit)
     if index==6:
         if subindex==0:
+            text = QLineEdit(str(safari.DEMAX))
             def edit():
                 safari.DEMAX = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.DEMAX))
             text.editingFinished.connect(edit)
         if subindex==1:
+            text = QLineEdit(str(safari.DEMIN))
             def edit():
                 safari.DEMIN = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.DEMIN))
             text.editingFinished.connect(edit)
         if subindex==2:
+            text = QLineEdit(str(safari.ABSERR))
             def edit():
                 safari.ABSERR = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.ABSERR))
             text.editingFinished.connect(edit)
     if index==7:
+        text = QLineEdit(str(safari.NPART))
         def edit():
             safari.NPART = parseVar(text.displayText())
             safari.save()
-        text = QLineEdit(str(safari.NPART))
         text.editingFinished.connect(edit)
     if index==8:
         button = QRadioButton()
+        button.setChecked(safari.RECOIL)
         def push():
             safari.RECOIL = button.isChecked()
             safari.save()
-        button.setChecked(safari.RECOIL)
         button.toggled.connect(push)
         hastext = False
         layout.addWidget(button)
     if index==9:
+        text = QLineEdit(str(safari.Z1))
         def edit():
             safari.Z1 = parseVar(text.displayText())
             safari.save()
-        text = QLineEdit(str(safari.Z1))
         text.editingFinished.connect(edit)
     if index==10:
+        text = QLineEdit(str(safari.NTAB))
         def edit():
             safari.NTAB = parseVar(text.displayText())
             safari.save()
-        text = QLineEdit(str(safari.NTAB))
         text.editingFinished.connect(edit)
     if index==11:
         if subindex==0:
+            text = QLineEdit(str(safari.RRMIN))
             def edit():
                 safari.RRMIN = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.RRMIN))
             text.editingFinished.connect(edit)
         if subindex==1:
+            text = QLineEdit(str(safari.RRSTEP))
             def edit():
                 safari.RRSTEP = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.RRSTEP))
             text.editingFinished.connect(edit)
     if index==12:
         if subindex==0:
+            text = QLineEdit(str(safari.ZMIN))
             def edit():
                 safari.ZMIN = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.ZMIN))
             text.editingFinished.connect(edit)
         if subindex==1:
+            text = QLineEdit(str(safari.ZSTEP))
             def edit():
                 safari.ZSTEP = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.ZSTEP))
             text.editingFinished.connect(edit)
     if index==13:
         if subindex==0:
+            text = QLineEdit(str(safari.MAXDIV))
             def edit():
                 safari.MAXDIV = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.MAXDIV))
             text.editingFinished.connect(edit)
         if subindex==1:
+            text = QLineEdit(str(safari.MINDIV))
             def edit():
                 safari.MINDIV = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.MINDIV))
             text.editingFinished.connect(edit)
         if subindex==2:
             layout.removeWidget(label)
@@ -1008,43 +996,43 @@ def makeInputBox(safari, name, index, subindex):
             hastext = False
     if index==14:
         if subindex==0:
+            text = QLineEdit(str(safari.NWRITX))
             def edit():
                 safari.NWRITX = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.NWRITX))
             text.editingFinished.connect(edit)
         if subindex==1:
+            text = QLineEdit(str(safari.NWRITY))
             def edit():
                 safari.NWRITY = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.NWRITY))
             text.editingFinished.connect(edit)
     if index==15:
         if subindex==0:
+            text = QLineEdit(str(safari.FAX))
             def edit():
                 safari.FAX = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.FAX))
             text.editingFinished.connect(edit)
         if subindex==1:
+            text = QLineEdit(str(safari.FAY))
             def edit():
                 safari.FAY = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.FAY))
             text.editingFinished.connect(edit)
     if index==16:
         if subindex==0:
+            text = QLineEdit(str(safari.NPAR))
             def edit():
                 safari.NPAR = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.NPAR))
             text.editingFinished.connect(edit)
         if subindex==1:
             # This should be replaced with a dropdown list later.
+            text = QLineEdit(str(safari.IPOT))
             def edit():
                 safari.IPOT = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.IPOT))
             text.editingFinished.connect(edit)
     #Parameters for image potential
     if index==17:
@@ -1053,17 +1041,17 @@ def makeInputBox(safari, name, index, subindex):
         hastext = False
     if index==18:
         if subindex==0:
+            text = QLineEdit(str(safari.NIMPAR))
             def edit():
                 safari.NIMPAR = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.NIMPAR))
             text.editingFinished.connect(edit)
         if subindex==1:
             # This should be replaced with a dropdown list later.
+            text = QLineEdit(str(safari.IIMPOT))
             def edit():
                 safari.IIMPOT = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.IIMPOT))
             text.editingFinished.connect(edit)
     #Parameters for image potential
     if index==19:
@@ -1073,22 +1061,22 @@ def makeInputBox(safari, name, index, subindex):
         hastext = False
     if index==20:
         if subindex==0:
+            text = QLineEdit(str(safari.TEMP))
             def edit():
                 safari.TEMP = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.TEMP))
             text.editingFinished.connect(edit)
         if subindex==1:
+            text = QLineEdit(str(safari.SEED))
             def edit():
                 safari.SEED = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.SEED))
             text.editingFinished.connect(edit)
         if subindex==2:
+            text = QLineEdit(str(safari.NITER))
             def edit():
                 safari.NITER = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.NITER))
             text.editingFinished.connect(edit)
     if index==21:
         button = QRadioButton()
@@ -1101,31 +1089,32 @@ def makeInputBox(safari, name, index, subindex):
         layout.addWidget(button)
     if index==22:
         if subindex==0:
+            text = QLineEdit(str(safari.SENRGY))
             def edit():
                 safari.SENRGY = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.SENRGY))
             text.editingFinished.connect(edit)
         if subindex==1:
+            text = QLineEdit(str(safari.BDIST))
             def edit():
                 safari.BDIST = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.BDIST))
             text.editingFinished.connect(edit)
     if index==23:
         if subindex==0:
+            text = QLineEdit(str(safari.AX))
             def edit():
                 safari.AX = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.AX))
             text.editingFinished.connect(edit)
         if subindex==1:
+            text = QLineEdit(str(safari.AY))
             def edit():
                 safari.AY = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.AY))
             text.editingFinished.connect(edit)
     if index==24:
+        text = QLineEdit(str(safari.NBASIS))
         def edit():
             safari.NBASIS = parseVar(text.displayText())
             # Pad the array.
@@ -1134,13 +1123,13 @@ def makeInputBox(safari, name, index, subindex):
                 safari.BASIS.append([0.0,0.0,0.0,0])
                 i = len(safari.BASIS)
             safari.save()
-        text = QLineEdit(str(safari.NBASIS))
         text.editingFinished.connect(edit)
         #We add extra stuff, so manually add text here.
         hastext=False
         layout.addWidget(text)
         makeBasisPopup(safari, layout, label, text, name, subindex)
     if index==25:
+        text = QLineEdit(str(safari.NTYPES))
         def edit():
             safari.NTYPES = parseVar(text.displayText())
             # Pad the arrays.
@@ -1150,7 +1139,6 @@ def makeInputBox(safari, name, index, subindex):
                 safari.SPRINGS.append([0.0,0.0,0.0])
                 i = len(safari.ATOMS)
             safari.save()
-        text = QLineEdit(str(safari.NTYPES))
         text.editingFinished.connect(edit)
         #We add extra stuff, so manually add text here.
         hastext=False
@@ -1167,16 +1155,16 @@ def makeInputBox(safari, name, index, subindex):
             hastext = False
             layout.addWidget(button)
         if subindex==1:
+            text = QLineEdit(str(safari.ATOMK))
             def edit():
                 safari.ATOMK = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.ATOMK))
             text.editingFinished.connect(edit)
         if subindex==2:
+            text = QLineEdit(str(safari.RNEIGH))
             def edit():
                 safari.RNEIGH = parseVar(text.displayText())
                 safari.save()
-            text = QLineEdit(str(safari.RNEIGH))
             text.editingFinished.connect(edit)
         
     # Most things use text box
