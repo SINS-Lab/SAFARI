@@ -2,6 +2,16 @@
 """
 Created on Tue Jan 29 14:52:04 2019
 
+This program loads in parameters from sample.input, and then
+saves output parameters to modified.input. If sample.input is
+not found, it will use some default values instead.
+
+sample.input and modified.input are in the working directory.
+
+When the input fields are de-focused, or enter is pressed, it
+will update the modified.input file. When the run button is
+pressed, it will execute the command in the box above it.
+
 @author: Patrick
 """
 
