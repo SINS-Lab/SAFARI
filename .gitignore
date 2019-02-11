@@ -1,0 +1,4 @@
+# These shouldn't be needed, as Safari.cbp should generate them.
+*Safari.depend
+Safari/bin/*
+Safari/obj/*
