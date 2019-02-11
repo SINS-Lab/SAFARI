@@ -1,0 +1,312 @@
+C
+C THE ULTIMATE DETECTOR ROUTINE.
+C
+C***********************************************************************
+C
+      LOGICAL FUNCTION DTECT(CELL,NDIV,MAXDIV)
+C
+C DTECT RECORDS THE TRAJECTORIES FROM CELL CELL IN THE DETECTOR
+C ARRAY DETECT IF THE FOUR TRAJECTORIES ALL FIT INTO ONE BIN. IF THEY
+C DO NOT, DTECT RETURNS WITH THE VALUE .FALSE.
+C
+      PARAMETER ( NARRAY=100000 )
+      IMPLICIT REAL*8 (A-H,O-Z)
+      INTEGER NUMDUD,DUD(4)
+      LOGICAL GOOD
+      LOGICAL INSIDE,FINE,MISS
+C
+      INTEGER CELL,NDIV,TRJADD(4,NARRAY),MAXDIV,level(narray)
+      REAL*4 ENRGY(NARRAY),THETA(NARRAY),PHI(NARRAY)
+      REAL*8 E(4),TH(4),PH(4)
+      LOGICAL EFIT,AFIT,ABOVE,BELOW
+      LOGICAL PBC
+      real*4 xtraj(narray),ytraj(narray)
+      INTEGER NWRITE
+      REAL*4 AREA(NARRAY)
+      REAL*8 WEIGHT
+      REAL*8 EMIN,EMAX,ESIZE
+      REAL*4 PX(NARRAY),PY(NARRAY),PZ(NARRAY)
+      REAL*8 PTRAJ(3,4)
+      REAL*8 DCIRC(4,4),DSEG(4,4)
+C               DCIRC IS THE 4 VECTORS DESCRIBING THE CIRCLES ON WHICH T
+C               DETECTOR SIDES LIE.
+C               DSEG IS THE 4 VECTORS DESCRIBING THE CIRCLES INSIDE WHIC
+C               THE DETECTOR SIDES LIE.
+C               THE FIRST 3 COMPONENTS OF EACH VECTOR ARE A UNIT VECTOR
+C               ALONG THE AXIS OF THE CIRCLE; THE FOURTH COMPONENT IS TH
+C               COSINE OF THE ANGLE FROM THE UNIT VECTOR TO A POINT ON T
+C               CIRCLE. THE UNIT VECTOR POINTS TOWARDS THE INSIDE OF THE
+      REAL*8 XDTECT(3)
+C               XDTECT IS A SPECIFIED UNIT VECTOR LYING INSIDE THE DETEC
+      REAL*8 XCELL(3)
+C               XCELL IS A POINT LYING INSIDE THE CELL.
+      REAL*8 CCIRC(4,6),CSEG(4,6)
+C               CCIRC IS THE SIX CIRCLES JOINING THE 4 MOMENTA IN ANGLE
+C               CSEG GIVES THE SEGMENTS OF THE CIRCLES.
+      REAL*8 END1(3),END2(3)
+      REAL*8 WORK1(3),WORK2(3)
+      INTEGER IVER(3),ITRI(3)
+      LOGICAL INTRNG,INQUAD
+C               FUNCTIONS FOR TESTING CONTAINMENT OF POINTS IN POLYGONS.
+      logical din(4)
+      COMMON/DETECT/AREA
+      COMMON/RESOLV/EMIN,EMAX,ESIZE,ASIZE
+      COMMON/TRAJS/ENRGY,THETA,PHI,TRJADD
+      common/points/xtraj,ytraj,level
+      COMMON/MOMENT/PX,PY,PZ
+      COMMON/DLIMIT/DCIRC,DSEG,XDTECT
+      COMMON/PBC/PBC,NWRITX,NWRITY
+      COMMON/MAXDIF/EDIF,ADIF,AMISS,ATOT,AMULT,EAV,AAV,NONRES
+     &              ,NUMCEL
+      COMMON/RANDOM/SEED,NITER
+      COMMON/UTILTY/DZERO, XNULL(4), PI
+C
+C
+      WEIGHT=1./(2.**(2.*NDIV))
+      WEIGHT=WEIGHT/(NWRITX*NWRITY*NITER)
+      NUMCEL=NUMCEL+1
+C
+C DON'T COMPUTE ANYTHING IF SMALLEST GRID HAS BEEN REACHED.
+      IF(NDIV.EQ.MAXDIV) GO TO 400
+C
+C Get the momenta of the four trajectories, putting DUDs last
+      NUMDUD = 0
+      IBOT = 0
+      ITOP = 5
+      DO 10 I=1,4
+         II=TRJADD(I,CELL)
+         IF(ENRGY(II).LT.0.) THEN
+C           WRITE(6,*) E(I)
+            ITOP = ITOP -1
+            J = ITOP
+         ELSE
+            IBOT = IBOT +1
+            J = IBOT
+         ENDIF
+         PTRAJ(1,J)=PX(II)
+         PTRAJ(2,J)=PY(II)
+         PTRAJ(3,J)=PZ(II)
+         E(J)=ENRGY(II)
+         TH(J)=THETA(II)
+         PH(J)=PHI(II)
+C        WRITE(6,*) E(J),TH(J),PH(J)
+C        WRITE(6,1111) I,PX(II),PY(II),PZ(II)
+C1111    FORMAT(' DTECT TRAJ #',I1,'  PX= ',D15.8,'   PY= ',D15.8
+C    &                 '   PZ=',D15.8)
+10    CONTINUE
+      NUMDUD = 4 -IBOT
+C
+C DON'T COMPUTE ANYTHING IF ENERGIES ARE ALL OUT OF RANGE.
+      IF(NUMDUD.EQ.4) GOTO 400
+      ABOVE=.TRUE.
+      BELOW=.TRUE.
+      DO 15 I=1,4
+         ABOVE=ABOVE.AND.(E(I).GT.EMAX)
+         BELOW=BELOW.AND.(E(I).LT.EMIN)
+15    CONTINUE
+      IF(ABOVE.OR.BELOW) GO TO 400
+C Since we've gotten here, NUMDUD is not = to 4.  Set up theta and phis
+C for any dud trajectories appropriately.
+      IF(NUMDUD.EQ.1) THEN
+         THMIN = 100.0D0
+         DO 20 I = 1,3
+            IF(TH(I).LT.THMIN) THEN
+               THMIN = TH(I)
+               II = I
+            ENDIF
+ 20      CONTINUE
+         PTRAJ(1,4) = PTRAJ(1,II)
+         PTRAJ(2,4) = PTRAJ(2,II)
+         PTRAJ(3,4) = 0.0D0
+         TH(4) = 90.00
+         PH(4) = PH(II)
+      ELSE IF(NUMDUD.GE.2) THEN
+         IF(NUMDUD.EQ.3) THEN
+            PTRAJ(1,2) = PTRAJ(1,1)
+            PTRAJ(2,2) = PTRAJ(2,1)
+            PTRAJ(3,2) = 0.0D0
+            TH(2) = 90.00
+            PH(2) = PH(1)
+         ENDIF
+         DO 21 I = 1,2
+            II = I+2
+            PTRAJ(1,II) = PTRAJ(1,I)
+            PTRAJ(2,II) = PTRAJ(2,I)
+            PTRAJ(3,II) = 0.0D0
+            TH(II) = 90.00
+            PH(II) = PH(I)
+ 21      CONTINUE
+      ENDIF
+C
+C FIND THE SIDES OF THE CELL.
+      NVECT=0
+      DO 25 I=1,3
+         DO 25 J=I+1,4
+            NVECT=NVECT+1
+C              THE ENDPOINTS OF THE ARC ARE THE NORMALIZED MOMENTA.
+            CALL EQUATE(END1,PTRAJ(1,I))
+            CALL EQUATE(END2,PTRAJ(1,J))
+            CALL NORM(END1)
+            CALL NORM(END2)
+C              If the two trajectory's directions differ by more than pi
+C              subdivide anyhow.
+            IF(DOT(END1,END2).LT.0.0D0) THEN
+               DTECT=.FALSE.
+               RETURN
+            ENDIF
+C              Construct the segment.
+            CALL GSGMNT(END1,END2,.TRUE.,CCIRC(1,NVECT),CSEG(1,NVECT))
+ 25   CONTINUE
+C
+C CHECK FOR INTERSECTIONS BETWEEN CELL AND DETECTOR SIDES.
+      DO 30 I=1,4
+         DO 30 J=1,6
+            II=INSECT(DCIRC(1,I),DSEG(1,I),
+     1                CCIRC(1,J),CSEG(1,J),WORK1,WORK2)
+            IF(II.NE.0) THEN
+C              WRITE(6,*) ' CELL AND DETECTOR INTERSECT'
+               GO TO 300
+            ENDIF
+30    CONTINUE
+C     WRITE(6,*) ' NO INTERSECTIONS'
+C
+C THERE ARE NO INTERSECTIONS.
+C See if the cell is entirely in the detector by checking one corner
+C
+      CALL EQUATE(WORK1,PTRAJ(1,1))
+      CALL NORM(WORK1)
+      IF(INQUAD(WORK1,XDTECT,DCIRC(1,1),DSEG(1,1),
+     1     DCIRC(1,2),DSEG(1,2),DCIRC(1,3),DSEG(1,3),
+     2     DCIRC(1,4),DSEG(1,4))) THEN
+         GO TO 300
+      ENDIF
+C
+C At this point, the cell and detector do not intersect, and the cell is
+C not entirely in the detector.  The options left are that the detector
+C and cell are distinct, or that the cell completely surrounds the detector.
+C EACH SET OF THREE MOMENTA DEFINES A TRIANGLE, AND THE AVERAGE
+C OF THE THREE MOMENTA LIES INSIDE THE TRIANGLE. DRAW A SEGMENT FROM
+C THE AVERAGE POINT OF A TRIANGLE TO A POINT OF THE DETECTOR,
+C SEE HOW MANY TIMES THE SEGMENT CROSSES THE TRIANGLE, AND DETERMINE
+C IF THE DETECTOR POINT IS INSIDE THE TRIANGLE. IF THE POINT IS
+C INSIDE NO TRIANGLE, THE CELL AND DETECTOR ARE DISTINCT.
+C     WRITE(6,*) ' CHECKING TRIANGLES.'
+C       LOOP THROUGH THE TRIANGLES. IX IS THE EXCLUDED VERTEX.
+      DO 60 IX=1,4
+C        AVERAGE THE VERTICES.
+         CALL EQUATE(XCELL,XNULL)
+         II=1
+         DO 55 J=1,4
+            IF(J.NE.IX) THEN
+C                IVER INDICATES WHICH VERTICES ARE BEING USED.
+               IVER(II)=J
+               II=II+1
+               CALL EQUATE(WORK1,PTRAJ(1,J))
+               CALL NORM(WORK1)
+               CALL VADD(XCELL,WORK1,XCELL)
+            ENDIF
+55       CONTINUE
+         CALL NORM(XCELL)
+C
+C            LOOP THROUGH THE PAIRS OF VERTICES AND FIGURE OUT TO WHI
+C            CELL SIDES (ITRI) THEY CORRESPOND.
+         DO 56 I=1,3
+            J=I+1
+            IF(J.EQ.4) J=1
+C             THE FOLLOWING IF CLUMSILY REVERSES THE LOOP
+C             'DO I=1,3; DO J=I+1,4'.
+            IF(IVER(I)*IVER(J).LT.5) THEN
+                ITRI(I)=IVER(I)+IVER(J)-2
+            ELSE
+                ITRI(I)=IVER(I)+IVER(J)-1
+            ENDIF
+56       CONTINUE
+C               IS THE DETECTOR POINT INSIDE THE TRIANGLE?
+C               IF SO, CHECK RESOLUTION. IF NOT, CHECK ANOTHER TRIANGLE.
+         IF(INTRNG(XDTECT,XCELL,CCIRC(1,ITRI(1)),CSEG(1,ITRI(1)),
+     1                  CCIRC(1,ITRI(2)),CSEG(1,ITRI(2)),
+     2                  CCIRC(1,ITRI(3)),CSEG(1,ITRI(3)))) THEN
+C           WRITE(6,*) ' DTECT: D CORNER IS IN TRIANGLE ',IX
+            ijji=1
+            GO TO 300
+         ENDIF
+C
+C       GET THE NEXT TRIANGLE.
+60    CONTINUE
+C
+C THE DETECTOR DID NOT LIE INSIDE ANY TRIANGLES. NO MORE SUBDIVISION.
+      GO TO 400
+C
+C
+C
+C THE DETECTOR AND THE CELL OVERLAP. IF THE TRAJECTORIES CAN BE RESOLVED
+C DTECT IS TRUE.
+300   CONTINUE
+C     WRITE(6,*) ' OVERLAP!!'
+C FIT IS TRUE IF ALL FOUR TRAJECTORIES COULD FIT INTO ONE DETECTOR BIN.
+      EFIT=.TRUE.
+      AFIT=.TRUE.
+      DO 310 I=1,3
+         DO 310 J=I+1,4
+            EFIT=EFIT.AND.(DABS(E(I)-E(J)).LE.ESIZE)
+            AFIT=AFIT.AND.(ANGLE(PTRAJ(1,I),PTRAJ(1,J)).LE.ASIZE)
+310   CONTINUE
+C     WRITE(6,*) 'EFIT ',EFIT,'    AFIT',AFIT
+C
+C IF THE TRAJECTORIES DON'T FIT, RETURN; BUT IF THERE HAVE BEEN TOO MANY
+C DIVISIONS ALREADY, DON'T.
+      IF(EFIT.AND.AFIT) GO TO 350
+      IF(NDIV.LT.MAXDIV) THEN
+         DTECT=.FALSE.
+C        WRITE(6,3444) (E(L),L=1,4)
+C        WRITE(6,3444) (TH(L),L=1,4)
+C        WRITE(6,3444) (PH(L),L=1,4)
+C3444     FORMAT(1X,4(2X,F8.4))
+         RETURN
+      ENDIF
+C
+350   CONTINUE
+C
+400   CONTINUE
+C INCREMENT THE WEIGHT ASSIGNED TO EACH TRAJECTORY.
+      MISS=.FALSE.
+      IF(NDIV.EQ.MAXDIV) THEN
+         ELOCAL=-1.0D0
+         ALOCAL=-1.0D0
+         DO 707 I=1,3
+            DO 707 J=I+1,4
+               ETEMP=DABS(E(I)-E(J))
+               ATEMP=ANGLE(PTRAJ(1,I),PTRAJ(1,J))
+               IF(E(I).GT.0.0D0 .AND. E(J).GT.0.0D0) THEN
+                  ELOCAL=MAX(ELOCAL,ETEMP)
+                  ALOCAL=MAX(ALOCAL,ATEMP)
+                  EDIF=MAX(EDIF,ETEMP)
+                  ADIF=MAX(ADIF,ATEMP)
+               ENDIF
+707      CONTINUE
+         IF(ELOCAL.GT.ESIZE .OR. ALOCAL.GT.ASIZE) THEN
+C           WRITE(6,*) ELOCAL,ALOCAL
+            NONRES=NONRES+1
+C CONSIDER ALL MISSES AS POTENTIALLY IN THE DETECTOR
+            AMISS=AMISS+4*WEIGHT
+            EAV=EAV+ELOCAL*4*WEIGHT
+            AAV=AAV+ALOCAL*4*WEIGHT
+            MISS=.TRUE.
+         ENDIF
+C
+      ENDIF
+      FINE=.FALSE.
+      DO 410 I=1,4
+         AREA(TRJADD(I,CELL))=AREA(TRJADD(I,CELL))+WEIGHT
+         din(i)=inside(th(i),ph(i))
+         ipoint=trjadd(i,cell)
+         fine=fine .or. din(i)
+410   CONTINUE
+C CONSIDER ALL CONTRIBUTING TO ATOT IF ONE DOES
+      IF(FINE) ATOT=ATOT+4*WEIGHT
+      IF(FINE .AND. (.NOT. MISS)) AMULT=AMULT+4*WEIGHT
+      DTECT=.TRUE.
+C
+C
+      RETURN
+      END
