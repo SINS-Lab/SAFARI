@@ -7,3 +7,4 @@ gui/build/*
 gui/dist/*
 gui/*.spec
 gui/__pycache__/*
+*.vs*
