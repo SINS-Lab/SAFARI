@@ -2,3 +2,8 @@
 *Safari.depend
 Safari/bin/*
 Safari/obj/*
+Safari/inputs/*
+gui/build/*
+gui/dist/*
+gui/*.spec
+gui/__pycache__/*

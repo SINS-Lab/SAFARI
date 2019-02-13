@@ -40,9 +40,6 @@
 		<Unit filename="../src/corrspl.f">
 			<Option weight="0" />
 		</Unit>
-		<Unit filename="../src/dchang.f">
-			<Option weight="0" />
-		</Unit>
 		<Unit filename="../src/dsetup.f">
 			<Option weight="0" />
 		</Unit>
@@ -55,8 +52,8 @@
 		<Unit filename="../src/dtput.f">
 			<Option weight="0" />
 		</Unit>
-		<Unit filename="../src/get.f">
-			<Option weight="0" />
+		<Unit filename="../src/flshso.c">
+			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../src/hameq.f">
 			<Option weight="0" />
