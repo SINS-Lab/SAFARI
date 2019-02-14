@@ -290,7 +290,7 @@ COMMON!!
         COMMON/RESOLV/EMIN,EMAX,ESIZE,ASIZE
         COMMON/CHAIN/XSTART,YSTART,XSTEP,YSTEP,NUMCHA
       COMMON/UTILTY/DZERO, XNULL(4), PI
-      
+
 C     DATA PI/3.1415 92653 58979/
       DATA SW,SE,NW,NE/5,6,9,10/
       PI=2.0d0*dasin(1.0d0)
@@ -326,6 +326,8 @@ C      Get names for input file and crystal file
       open(unit=10,form='formatted',file=Fname)
       Fname=finput(1:linput)//'.undata'
       open(unit=13,form='unformatted',file=Fname)
+      Fname=finput(1:linput)//'.data'
+      open(unit=66,form='formatted',file=Fname)
 C     Fname=finput(1:linput)//'.square'
 c     open(unit=22,form='formatted',file=Fname)
 C GET INPUT.

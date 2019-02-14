@@ -9,12 +9,14 @@ C
       IMPLICIT REAL*8 (A-H,O-Z)
       INTEGER*4 KALL
 C
-      REAL*8 X,Y,Z,PX,PY,PZ,XAT(100),YAT(100),ZAT(100),
-     1                          PXAT(100),PYAT(100),PZAT(100)
-      REAL*8 XLAT(100,3),SPRING(10,3)
-      REAL*8 DX,DY,DZ,DPX,DPY,DPZ,DXAT(100),DYAT(100),DZAT(100),
-     1                          DPXAT(100),DPYAT(100),DPZAT(100)
-      REAL*8 MION,MASS(10)
+      REAL*8 X,Y,Z,PX,PY,PZ,
+     1       XAT(100),YAT(100),ZAT(100),
+     2       PXAT(100),PYAT(100),PZAT(100)
+      REAL*8 XLAT(100,3),SPRING(11,3)
+      REAL*8 DX,DY,DZ,DPX,DPY,DPZ,
+     1       DXAT(100),DYAT(100),DZAT(100),
+     2       DPXAT(100),DPYAT(100),DPZAT(100)
+      REAL*8 MION,MASS(11)
       REAL*8 MION1,MASS1(10),MINVV
       REAL*8 F
 C               F IS A FORCE.
@@ -49,7 +51,7 @@ C DX/DT = P/M
       DY=PY*MION1
       DZ=PZ*MION1
 C
-
+c      write(6,*) "hameq"
 C LOOP THROUGH ATOMS. SUM UP THE FORCES ON THE ATOMS TO GET THE
 C FORCE ON THE ION.
 C     DPX IS THE X COMPONENT OF THE FORCE (DPX/DT) ON THE ION.
@@ -65,6 +67,7 @@ CVDIR ASSUME COUNT(6)
       DO 100 J=1,NPART
          NAT=TYPEAT(J)
          MINVV=MASS1(NAT)
+
 C           DX/DT FOR SURFACE ATOMS.
          DXAT(J)=PXAT(J)*MINVV
          DYAT(J)=PYAT(J)*MINVV
@@ -85,6 +88,7 @@ C               IF ION AND ATOM ARE AT THE SAME PLACE, F=0 BY SYMMETRY.
 C                 USE DV/DX=(DV/DR**2)*DR**2/DX = (DV/DR**2)*2X.
             DDR=-2.0D0*LDVDR2(RR,NAT)
             IF(IMAGE .AND. IIMPOT.EQ.2) DDR=DDR-2.0D0*LINDR2(RR)
+c            write(6,*) ddr, rr, nat
             F=DDR*XA
               DPXAT(J)=DPXAT(J)+F
               DPX=DPX-F

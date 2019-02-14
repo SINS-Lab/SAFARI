@@ -36,7 +36,7 @@ C
 C CHAIN VARIABLES
       REAL*4 XSTART,YSTART, XSTEP,YSTEP
       INTEGER NUMCHA
-      
+
 C
 COMMON!!
       COMMON/BEAM/E0,THETA0,PHI0
@@ -251,9 +251,13 @@ C
 C WRITE OUTPUT
       WRITE(13) NN
       DO 100 I=1,NN
+C        Write to the undata file
          WRITE(13) Xtraj(I),Ytraj(I),Level(I)
          write(13) ztraj(i)
          WRITE(13) Enrgy(I),Theta(I),Phi(I),Area(I)
+C        Write to the plaintext file
+         WRITE(66,*)Xtraj(I),Ytraj(I),ztraj(i),"   ",
+     &   Enrgy(I),Theta(I),Phi(I),Level(I),Area(I)
 100   CONTINUE
 C
       RETURN

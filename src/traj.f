@@ -171,6 +171,12 @@ C       FIND MAXIMUM DIFFERENCE (ERRMAX).
       PXP=PX+.5*DELT*(DPX+DPXX)
       PYP=PY+.5*DELT*(DPY+DPYY)
       PZP=PZ+.5*DELT*(DPZ+DPZZ)
+
+      IF((DPX.EQ.0).AND.(DPY.EQ.0).AND.(DPZ.EQ.0))THEN
+        WRITE(6,*) PX, PY, PZ, X, Y, Z
+        GOTO 666
+      ENDIF
+
       EX=.25*DELT*DELT*MION1*(DPX-DPXX)
       EY=.25*DELT*DELT*MION1*(DPY-DPYY)
       EZ=.25*DELT*DELT*MION1*(DPZ-DPZZ)
@@ -311,4 +317,10 @@ C TAKE ANOTHER STEP.
 c     n=n+1
 c     write(34,*) n,delt
       GO TO 1
+
+666   CONTINUE
+      WRITE(0,6666)
+6666  FORMAT(' ???ERROR IN TRAJ???')
+      STOP
+
       END
