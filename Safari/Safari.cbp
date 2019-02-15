@@ -78,6 +78,9 @@
 		<Unit filename="../src/safsubs.f">
 			<Option weight="0" />
 		</Unit>
+		<Unit filename="../src/safsubs_modes.f">
+			<Option weight="0" />
+		</Unit>
 		<Unit filename="../src/scat.f">
 			<Option weight="0" />
 		</Unit>

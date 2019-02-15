@@ -397,76 +397,12 @@ C FOR CHAIN CALCULATIONS AND MONTE CARLO:  REQUIRES MAXDIV.EQ.MINDIV.EQ.1
       IF(MAXDIV.EQ.MINDIV.AND.MAXDIV.EQ.1) THEN
 C IF NWRITX AND NWRITY .EQ.666 THEN DO MONTE CARLO
          IF(NWRITX.EQ.666 .AND. NWRITY.EQ.666) THEN
-            iter=numcha/1000
-            do 808 kk=1,iter
-               DO 707 L=1,1000
-C                  write(*,*) 'new trajectory'
-                  SEED=RANDSF(SEED)
-                  XTRAJ(L) = XSTART+FAX*SEED*AX
-                  SEED=RANDSF(SEED)
-                  YTRAJ(L) = YSTART+FAY*SEED*AY
-C                Back up from impact point to start
-                  X = XTRAJ(L) -OFFX
-                  Y = YTRAJ(L) -OFFY
-c                 write(6,*) 'calling SCATTR'
-                  CALL SCATTR(X,Y,Z1,PX0,PY0,PZ1,Enrgy(L),
-     &                    Theta(L),Phi(L),PX(L),PY(L),PZ(L),NPART,L)
-                  Level(L)=1
-                  Area(L)=1./NUMCHA
-707            CONTINUE
-               nber=1000
-               CALL OUTPUT(nber+1)
- 808        continue
-C IF on the CONVEX, USE
-            TIMER=dtime(tarray)
-C ELSE IF on the RSC6000, USE
-C           ITIMER=mclock()
-C END COMMENT IF
-            WRITE(10,4533) numcha
-4533        FORMAT(1X,'NUMBER OF TRAJS. TOTAL = ',I6)
-C IF on the CONVEX, USE
-            write(10,9101) tarray(1)
-            write(10,9102) tarray(2)
-C ELSE IF on the RSC6000, USE
-C            TIMER=ITIMER/100.0
-C            WRITE(10,9101) TIMER
-C END COMMENT IF
-9101        format(1x,'CPU time = ',f16.8,' secs')
-9102        format(1x,'System paging time = ',f16.8,' secs')
-            stop
+            call montecarlo(OFFX,OFFY, PX0, PY0, PZ1, NPART)
 c           go to 3003
          ENDIF
-C ASSUME CHAIN WANTED.
-         DO 321 L=1,NUMCHA
-C TAKE CARE OF THERMAL
-            SEED=RANDSF(SEED)
-C THIS WON'T MAKE A DIFFERENCE IF NITER EQ 1
-            XTRAJ(L) = XSTART+(L-1)*XSTEP
-            YTRAJ(L) = YSTART+(L-1)*YSTEP
-            X = XTRAJ(L) -OFFX
-            Y = YTRAJ(L) -OFFY
-            CALL SCATTR(X,Y,Z1,PX0,PY0,PZ1,Enrgy(L),Theta(L),Phi(L),
-     &                  PX(L),PY(L),PZ(L),NPART,L)
-            Level(L)=1
-            Area(L)=1./NUMCHA
-321      CONTINUE
-         CALL OUTPUT(NUMCHA+1)
-C IF on the CONVEX, USE
-         TIMER=dtime(tarray)
-C ELSE IF on the RSC6000, USE
-C         ITIMER=mclock()
-C END COMMENT IF
-         WRITE(10,5533) numcha
-5533     FORMAT(1X,'NUMBER OF TRAJS. TOTAL = ',I6)
-C IF on the CONVEX, USE
-         write(10,9101) tarray(1)
-         write(10,9102) tarray(2)
-C ELSE IF on the RSC6000, USE
-C        TIMER=ITIMER/100.0
-C        WRITE(10,9101) TIMER
-C END COMMENT IF
-         stop
-c        go to 3003
+
+*        Assume we want a chain calculation instead.
+         call chainscat(OFFX, OFFY, PX0, PY0, PZ1, NPART)
       ENDIF
 C
 C LOOP OVER THERMAL CONFIGURATIONS
@@ -834,6 +770,8 @@ C IF on the CONVEX, USE
       TIMER=dtime(tarray)
       write(10,9101) tarray(1)
       write(10,9102) tarray(2)
+9101  format(1x,'CPU time = ',f16.8,' secs')
+9102  format(1x,'System paging time = ',f16.8,' secs')
 C ELSE IF on the RSC6000, USE
 C      ITIMER=mclock()
 C      TIMER=ITIMER/100.0
