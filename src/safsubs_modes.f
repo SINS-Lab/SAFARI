@@ -6,17 +6,14 @@
       implicit real*8 (a-h,o-z)
       include "params.txt"
 
-*     This is used for timing.
-      real tarray(2)
-
       common/xtal/ax,ay
       common/detect/area(narray)
-      common/trajs/enrgy(narray),theta(narray),phi(narray),trjadd
-      common/other/z1,maxdiv,mindiv,fax,fay,start
+      common/trajs/enrgy(narray),theta(narray),phi(narray)
+      common/other/z1,maxdiv,mindiv,fax,fay
       common/chain/xstart,ystart,xstep,ystep,numcha
       common/points/xtraj(narray),ytraj(narray),level(narray)
       common/moment/px(narray),py(narray),pz(narray)
-      common/random/seed,niter
+      common/random/seed
 
 *     Split into sets of 1000 particles
       iter=numcha/1000
@@ -39,40 +36,24 @@
               nber=1000
               call output(nber+1)
  808  continue
-
-*     Conclude Timer
-      timer=dtime(tarray)
-
-*     Write to the param file.
-      write(10,5533) numcha
-      write(10,9101) tarray(1)
-      write(10,9102) tarray(2)
-
-5533  format(1X,'NUMBER OF TRAJS. TOTAL = ',i6)
-9101  format(1x,'CPU time = ',f16.8,' secs')
-9102  format(1x,'System paging time = ',f16.8,' secs')
-      stop
       end
 
       subroutine chainscat(offx,offy, px0, py0, pz1, npart)
 
-*      Run as a montecarlo simulation, where numcha trajectories
-*      are simulated in sets of 1000
+*      Run as a chain simulation, where numcha trajectories
+*      are simulated in a row
 
       implicit real*8 (a-h,o-z)
       include "params.txt"
 
-*     This is used for timing.
-      real tarray(2)
-
       common/xtal/ax,ay
       common/detect/area(narray)
-      common/trajs/enrgy(narray),theta(narray),phi(narray),trjadd
-      common/other/z1,maxdiv,mindiv,fax,fay,start
+      common/trajs/enrgy(narray),theta(narray),phi(narray)
+      common/other/z1,maxdiv,mindiv,fax,fay
       common/chain/xstart,ystart,xstep,ystep,numcha
       common/points/xtraj(narray),ytraj(narray),level(narray)
       common/moment/px(narray),py(narray),pz(narray)
-      common/random/seed,niter
+      common/random/seed
 
 C ASSUME CHAIN WANTED.
       do 321 l=1,numcha
@@ -89,19 +70,4 @@ C THIS WON'T MAKE A DIFFERENCE IF NITER EQ 1
           area(l)=1./numcha
 321   continue
       call output(numcha+1)
-
-*     Conclude Timer
-      timer=dtime(tarray)
-
-*     Write to the param file.
-      write(10,5533) numcha
-      write(10,9101) tarray(1)
-      write(10,9102) tarray(2)
-
-5533  format(1X,'NUMBER OF TRAJS. TOTAL = ',i6)
-9101  format(1x,'CPU time = ',f16.8,' secs')
-9102  format(1x,'System paging time = ',f16.8,' secs')
-
-      stop
       end
-

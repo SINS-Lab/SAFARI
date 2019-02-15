@@ -337,7 +337,7 @@ C SET UP THE DETECTOR.
 c     write(6,*) 'calling Dsetup'
       CALL DSETUP(NDTECT)
 c     write(6,*) 'back from Dsetup'
-C Call dtput to write detector parameters to file 13
+C Call dtput to write detector parameters to data files
       Call dtput
 C
 C TABULATE POTENTIALS.
@@ -347,7 +347,7 @@ C TABULATE POTENTIALS.
             CALL TABLE(DVDR2,RRMIN,RRSTEP,NTAB,TDVDR2(1,NV),NV)
 10       CONTINUE
          IF(IMAGE) THEN
-C                 USE IMAGE POTENTIALS
+C           USE IMAGE POTENTIALS
             IF(IIMPOT.EQ.1) THEN
                CALL TABLE(DVIMDZ,ZMIN,ZSTEP,NTAB,TDIMDZ,0)
             ELSE IF(IIMPOT.EQ.2) THEN
@@ -377,33 +377,30 @@ C       IMAGES ARE FLAT THIS FAR OUT
          PZ1=PZ0
       ENDIF
 c start timing
-C IF on the CONVEX, USE
       timer=dtime(tarray)
-C ELSE IF on the IBM RSC6000, USE
-C      ITIMER=mclock()
-C END COMMENT IF
 C
 C PREPARE FOR THERMAL EFFECTS
 c     write(6,*) 'calling tsetup'
       CALL TSETUP(TEMP)
 c     write(6,*) 'back from tsetup'
+C FOR CHAIN CALCULATIONS AND MONTE CARLO:  REQUIRES MAXDIV.EQ.MINDIV.EQ.1
+      IF(MAXDIV.EQ.MINDIV.AND.MAXDIV.EQ.1) THEN
+C IF NWRITX AND NWRITY .EQ.666 THEN DO MONTE CARLO
+         IF(NWRITX.EQ.666 .AND. NWRITY.EQ.666) THEN
+            call montecarlo(OFFX, OFFY, PX0, PY0, PZ1, NPART)
+            go to 777
+         ENDIF
+
+*        Assume we want a chain calculation instead.
+         call chainscat(OFFX, OFFY, PX0, PY0, PZ1, NPART)
+         go to 777
+      ENDIF
 C THE EFFECTIVE PRIMARY CELL HAS SIDES AXPRIM AND AYPRIM.
 C ONE EFFECTIVE PRIMARY CELL IS COVERED, THE RESULTS ARE
 C WRITTEN TO THE DISK, THE ARRAYS ARE REINITIALIZED, AND THE
 C NEXT EPC IS COVERED.
       AXPRIM=AX*FAX/NWRITX
       AYPRIM=AY*FAY/NWRITY
-C FOR CHAIN CALCULATIONS AND MONTE CARLO:  REQUIRES MAXDIV.EQ.MINDIV.EQ.1
-      IF(MAXDIV.EQ.MINDIV.AND.MAXDIV.EQ.1) THEN
-C IF NWRITX AND NWRITY .EQ.666 THEN DO MONTE CARLO
-         IF(NWRITX.EQ.666 .AND. NWRITY.EQ.666) THEN
-            call montecarlo(OFFX,OFFY, PX0, PY0, PZ1, NPART)
-c           go to 3003
-         ENDIF
-
-*        Assume we want a chain calculation instead.
-         call chainscat(OFFX, OFFY, PX0, PY0, PZ1, NPART)
-      ENDIF
 C
 C LOOP OVER THERMAL CONFIGURATIONS
       DO 2345 ISURF=1,NITER
@@ -770,8 +767,6 @@ C IF on the CONVEX, USE
       TIMER=dtime(tarray)
       write(10,9101) tarray(1)
       write(10,9102) tarray(2)
-9101  format(1x,'CPU time = ',f16.8,' secs')
-9102  format(1x,'System paging time = ',f16.8,' secs')
 C ELSE IF on the RSC6000, USE
 C      ITIMER=mclock()
 C      TIMER=ITIMER/100.0
@@ -786,6 +781,27 @@ C9031 format(1x, 'impact: x=',d15.7,' y=',d15.7)
       close(10)
       close(66)
       STOP
+
+777   CONTINUE
+*     Conclude Timer
+      timer=dtime(tarray)
+
+*     Write to the param file.
+      write(10,5533) numcha
+      write(10,9101) tarray(1)
+      write(10,9102) tarray(2)
+      write(10,9103) 1000. * tarray(1)/numcha
+
+5533  format(1X,'NUMBER OF TRAJS. TOTAL = ',i6)
+9101  format(1x,'CPU time = ',f16.4,' secs')
+9102  format(1x,'System paging time = ',f16.4,' secs')
+9103  format(1x,'CPU time Per Particle= ',f16.4,' ms')
+      close(13)
+      close(9)
+      close(10)
+      close(66)
+      stop
+
 C
 C
 C
