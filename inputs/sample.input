@@ -11,7 +11,7 @@ T                                      RECOIL
 0.   2.50000E-03                       R MIN,STEP
 0.   3.00000E-04                       Z MIN,STEP
 1 1                                   MAXDIV, MINDIV *1
-10000
+1000
 0 0.1
 0 0.1
 666        666                         NWRITX, NWRITY

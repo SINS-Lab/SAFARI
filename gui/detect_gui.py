@@ -312,6 +312,37 @@ class Spectrum:
         plt.xlabel('Angle')
         plt.ylabel('Energy')
         plt.show()
+
+    def plotPhiTheta(self):
+        
+        # X Coord on graph
+        x = []
+        # Y Coord on graph
+        y = []
+        # Dot Colour, scaled by area.
+        c = []
+        
+        for i in range(4,len(self.data)):
+            line = self.data[i]
+            x.append(line[5])
+            y.append(line[4])
+            c.append(line[6])
+        
+       # c = np.log(c)
+        
+        if np.min(c) != np.max(c):
+            c = c - np.min(c)
+        c = c / np.max(c)
+        print(np.max(c))
+        print(np.min(c))
+        colour = [(var,0,0) for var in c]
+        
+        plt.figure('T_P')
+        plt.scatter(x, y, c=colour)
+        plt.suptitle("Detections: "+str(len(x)))
+        plt.xlabel('Phi Angle')
+        plt.ylabel('Theta Angle')
+        plt.show()
         
 
     def run(self, data):
@@ -473,6 +504,25 @@ class Spectrum:
                 pass
         etbutton.clicked.connect(runET)
         layout.addWidget(etbutton)
+        
+        #Button to run the spectrum stuff.
+        tpbutton = QPushButton('Theta vs Phi')
+        def runTP():
+            try:
+                self.clean(data,emin=float(emin.displayText()),\
+                                emax=float(emax.displayText()),\
+                                phimin=float(phimin.displayText()),\
+                                phimax=float(phimax.displayText()),\
+                                thmin=float(thmin.displayText()),\
+                                thmax=float(thmax.displayText()),\
+                                lmin=float(lmin.displayText()),\
+                                lmax=float(lmax.displayText()))
+                self.plotPhiTheta()
+            except Exception as e:
+                print(e)
+                pass
+        tpbutton.clicked.connect(runTP)
+        layout.addWidget(tpbutton)
         
         #Button to run the spectrum stuff.
         impbutton = QPushButton('Impact Plot')

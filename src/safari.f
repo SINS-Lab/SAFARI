@@ -846,8 +846,7 @@ C9031 format(1x, 'impact: x=',d15.7,' y=',d15.7)
       close(13)
       close(9)
       close(10)
-      close(12)
-      close(22)
+      close(66)
       STOP
 C
 C
