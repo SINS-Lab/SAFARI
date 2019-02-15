@@ -1,8 +1,8 @@
       subroutine surf (m,n,x,y,z,iz,opt,zp,temp,sigma,ierr)
 ***********************************************************************
       implicit real*8 (a-h,o-z)
-      integer m,n,iz,ierr
-      real*8 x(m),y(n),z(iz,n),opt(*),zp(m,n,*),temp(*),sigma
+      integer m,n,iz,ierr,opt(*)
+      real*8 x(m),y(n),z(iz,n),zp(m,n,*),temp(*),sigma
 c
 c                      from the spline under tension package
 c                       coded by a. k. cline and r. j. renka

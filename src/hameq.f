@@ -130,8 +130,8 @@ c RR0 is the equillibrium spacing squared
                   if(RR0 .le. rneigh) then
                      R0=dsqrt(RR0)
                      near=.true.
-	          else
-           	     near=.false.
+                  else
+                     near=.false.
                   endif
 c
 c now, the magnitude of the force on i due to j is equal to

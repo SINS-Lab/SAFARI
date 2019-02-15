@@ -166,7 +166,7 @@ C      write(6,*) 'Creating corrugated image potential data...'
           do iz = izmin,nz(izb)
               z = zmax(izb-1) + iz*dz
 C              write(6,200)z
-200   format(1x,'z = ',f6.2)
+c200   format(1x,'z = ',f6.2)
               zz(nzt) = z
 
               ngt = 1
@@ -506,8 +506,8 @@ C     write(6,300)
 *
 *     format list...
 *
-200   format(/,3x,' vgzspl: computing spline coefficients...',//)
-300   format(/,3x,' vgzspl: procedure complete.             ',//)
+c200   format(/,3x,' vgzspl: computing spline coefficients...',//)
+c300   format(/,3x,' vgzspl: procedure complete.             ',//)
 400   format(/,3x,' vgzspl: abnormal termination with ierr1 = ',i4,/,
      -            ' vgzspl: see description in surf.f        ',/,
      -            ' Execution halted.                        ',//)
