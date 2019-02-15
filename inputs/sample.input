@@ -10,8 +10,11 @@ T                                      RECOIL
 30000                                  TABLE ENTRIES
 0.   2.50000E-03                       R MIN,STEP
 0.   3.00000E-04                       Z MIN,STEP
-10 2                                   MAXDIV, MINDIV *1
-10        10                           NWRITX, NWRITY
+1 1                                   MAXDIV, MINDIV *1
+10000
+0 0.1
+0 0.1
+666        666                         NWRITX, NWRITY
 1.         1.                          FAX, FAY
 4 1                                    NPAR, IPOT
 9125.84 4.44 66703.59 11.24            Pars ^

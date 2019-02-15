@@ -5,10 +5,11 @@ C RELATIONSHIP BETWEEN THE SAFARI AND CORRUGATED COORDINATE AXES.
       SUBROUTINE IMINIT(IDERIV,ISCALE)
 C
       IMPLICIT REAL*8 (A-H,O-Z)
+      INCLUDE "params.txt"
       LOGICAL GOTZIP,ZIP,NONZIP
       REAL*8 XTEMP(3),XSAVE(3)
-      INTEGER TYPBAS(70)
-      COMMON/XTAL/AX,AY,XBASIS(3,70),TYPBAS,NBASIS
+      INTEGER TYPBAS(NBASISMAX)
+      COMMON/XTAL/AX,AY,XBASIS(3,NBASISMAX),TYPBAS,NBASIS
       COMMON/CORPAR/TOL,GTOL,A,B,D,VIMCOS,VIMSIN
       COMMON/POTPAR/POTPAR(30),PIMPAR(10),IPOT,IIMPOT
       COMMON/UTILTY/DZERO, XNULL(4), PI
@@ -177,8 +178,8 @@ C              write(6,200)z
                       g = gmax(igb-1) + ig*dg
                       gg(ngt) = g
                       exgz = dexp(iscale*g*z)
-                      vgz(ngt,nzt) = exgz*genvgz(0,g,z)	
-                      if (ideriv.eq.1) then	
+                      vgz(ngt,nzt) = exgz*genvgz(0,g,z)
+                      if (ideriv.eq.1) then
                           vgzp(ngt,nzt) = exgz*genvgz(1,g,z)
                       endif
                       ngt = ngt + 1
@@ -214,7 +215,7 @@ C      close (iunit)
 ***********************************************************************
       subroutine gaus(n,r,w,ra,rb)
       implicit real*8 (a-h,o-z)
-* 
+*
 *     allowed n-values;  3-10,12,16,20,24
 *
       dimension r(n),w(n),xr(64),xr1(33),xr2(31),xw(64),xw1(33),
@@ -295,7 +296,7 @@ C      close (iunit)
           r(nby2+1-k)=-xr(ns+k)
           w(nss+k)=xw(k+ns)*ba
           w(nby2+1-k)=xw(k+ns)*ba
-      enddo 
+      enddo
 
       do k=1,n
           r(k)=ba*r(k)+bp
@@ -317,7 +318,7 @@ C      close (iunit)
 *       genvgz.f                                                      *
 *---------------------------------------------------------------------*
 *                                                                     *
-*       decription:   This function calculates the Fourier            * 
+*       decription:   This function calculates the Fourier            *
 *                     coefficient  of the image potential and its     *
 *                     derivative at a distance z from the surface     *
 *                     plane by summing the contributions from a set   *

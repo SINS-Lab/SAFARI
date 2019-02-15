@@ -35,7 +35,7 @@
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="../src/corrinit.f">
-			<Option weight="0" />
+			<Option weight="1" />
 		</Unit>
 		<Unit filename="../src/corrspl.f">
 			<Option weight="0" />
@@ -47,7 +47,7 @@
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="../src/dtect.f">
-			<Option weight="0" />
+			<Option weight="1" />
 		</Unit>
 		<Unit filename="../src/dtput.f">
 			<Option weight="0" />
@@ -56,28 +56,31 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../src/hameq.f">
-			<Option weight="0" />
+			<Option weight="1" />
 		</Unit>
 		<Unit filename="../src/inside.f">
 			<Option weight="0" />
+		</Unit>
+		<Unit filename="../src/params.txt">
+			<Option compile="1" />
 		</Unit>
 		<Unit filename="../src/potential.f">
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="../src/safari.f">
-			<Option weight="0" />
+			<Option weight="1" />
 		</Unit>
 		<Unit filename="../src/safio.f">
-			<Option weight="0" />
+			<Option weight="1" />
 		</Unit>
 		<Unit filename="../src/safsubs.f">
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="../src/scat.f">
-			<Option weight="0" />
+			<Option weight="1" />
 		</Unit>
 		<Unit filename="../src/traj.f">
-			<Option weight="0" />
+			<Option weight="1" />
 		</Unit>
 		<Unit filename="../src/tsubs.f">
 			<Option weight="0" />

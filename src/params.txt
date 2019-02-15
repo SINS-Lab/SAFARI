@@ -1,0 +1,21 @@
+c     generic array sizes for things.
+      PARAMETER(NARRAY=100000)
+
+c     Size of precalculated potential tables
+      PARAMETER(NTABLE=30000)
+
+c     Maximum number of basis atoms
+c     Originally: 70
+      PARAMETER(NBASISMAX=500)
+
+c     Maximum types of basis atoms
+c     Originally: 10
+      PARAMETER(NTYPEMAX=500)
+
+c     Maximum number of atoms to check
+c     Must be much larger than NBASISMAX
+c     Originally: 100
+      PARAMETER(NPARTMAX=10000)
+
+c     Related to cell counts.
+      PARAMETER(MXDIV=20)

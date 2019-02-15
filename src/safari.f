@@ -65,10 +65,8 @@ c                                         = 421.44 a.u. time units
 C KEEP THIS IN MIND WHEN WRITING DVDR, ETC.
 C
 C
-      PARAMETER ( NARRAY=100000 )
-      PARAMETER ( NTABLE=30000 )
-      PARAMETER ( MXDIV=20 )
       IMPLICIT REAL*8 (A-H,O-Z)
+      INCLUDE "params.txt"
 C
 C DETECTION:
 C
@@ -104,18 +102,18 @@ C
 C           DIMENSIONS OF THE SURFACE UNIT CELL IN ANGSTROMS.
       INTEGER NBASIS
 C           NUMBER OF BASIS ATOMS IN THE UNIT CELL.
-      REAL*8 XBASIS(3,70)
+      REAL*8 XBASIS(3,NBASISMAX)
 C           BASIS VECTORS OF ATOMS IN THE CELL IN ANGSTROMS.
-      INTEGER TYPBAS(70)
+      INTEGER TYPBAS(NBASISMAX)
 C           TYPES OF ATOMS IN CELL.
 C           EACH VARIETY OF ATOM IS ASSIGNED AN INTEGER TYPE, WHICH
 C           IS THEN REFERRED TO BY ANY ROUTINE WHICH REQUIRES THE
 C           MASS OR POTENTIAL OF THE ATOM.
-      INTEGER TYPEAT(100)
+      INTEGER TYPEAT(NPARTMAX)
 C               USED BY SCAT AND DECLARED HERE TO GET THE COMMON BLOCKS
-      REAL*8 MASS(10)
+      REAL*8 MASS(NTYPEMAX)
 C           MASSES IN AMU OF SURFACE ATOMS OF VARIOUS TYPES.
-      REAL*8 MASS1(10)
+      REAL*8 MASS1(NTYPEMAX)
 C               INVERSES OF MASSES.
 C
 C INTEGRATION OF TRAJECTORIES:
@@ -336,9 +334,9 @@ C GET INPUT.
       CALL INPUTS
 C
 C SET UP THE DETECTOR.
-C     write(6,*) 'calling Dsetup'
+c     write(6,*) 'calling Dsetup'
       CALL DSETUP(NDTECT)
-C     write(6,*) 'back from Dsetup'
+c     write(6,*) 'back from Dsetup'
 C Call dtput to write detector parameters to file 13
       Call dtput
 C
@@ -386,7 +384,9 @@ C      ITIMER=mclock()
 C END COMMENT IF
 C
 C PREPARE FOR THERMAL EFFECTS
+c     write(6,*) 'calling tsetup'
       CALL TSETUP(TEMP)
+c     write(6,*) 'back from tsetup'
 C THE EFFECTIVE PRIMARY CELL HAS SIDES AXPRIM AND AYPRIM.
 C ONE EFFECTIVE PRIMARY CELL IS COVERED, THE RESULTS ARE
 C WRITTEN TO THE DISK, THE ARRAYS ARE REINITIALIZED, AND THE
@@ -408,6 +408,7 @@ C                  write(*,*) 'new trajectory'
 C                Back up from impact point to start
                   X = XTRAJ(L) -OFFX
                   Y = YTRAJ(L) -OFFY
+c                 write(6,*) 'calling SCATTR'
                   CALL SCATTR(X,Y,Z1,PX0,PY0,PZ1,Enrgy(L),
      &                    Theta(L),Phi(L),PX(L),PY(L),PZ(L),NPART,L)
                   Level(L)=1

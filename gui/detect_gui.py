@@ -79,7 +79,7 @@ def loadFromUndata(file, cache):
 
 def load(file):
     
-    if file.endsWith('.txt'):
+    if file.endswith('.txt'):
         return loadFromText(file)
     
     data = []
@@ -158,6 +158,7 @@ class Detector:
         out.close()
         plt.figure('I_T')
         plt.plot(angles, intensity)
+        plt.suptitle("Detections: "+str(len(aArr)))
         plt.xlabel('Angle')
         plt.ylabel('Intensity')
         plt.show()
@@ -182,6 +183,7 @@ class Detector:
         out.close()
         plt.figure('I_E')
         plt.plot(energy, intensity)
+        plt.suptitle("Detections: "+str(len(aArr)))
         plt.xlabel('Energy')
         plt.ylabel('Intensity')
         plt.show()
@@ -192,6 +194,7 @@ class Detector:
         
         plt.figure('X_Y')
         plt.scatter(x, y)
+        plt.suptitle("Detections: "+str(len(x)))
         plt.xlabel('X Impact (Angstroms)')
         plt.ylabel('Y Impact (Angstroms)')
         plt.show()
@@ -305,6 +308,7 @@ class Spectrum:
         
         plt.figure('E_T')
         plt.scatter(x, y, c=colour)
+        plt.suptitle("Detections: "+str(len(x)))
         plt.xlabel('Angle')
         plt.ylabel('Energy')
         plt.show()
