@@ -79,7 +79,7 @@ def loadFromUndata(file, cache):
 
 def load(file):
     
-    if file.endswith('.txt'):
+    if file.endswith('.txt') or file.endswith('.data'):
         return loadFromText(file)
     
     data = []
@@ -566,7 +566,7 @@ def run(spectrum, impact, display, glean):
     
     sublayout = QHBoxLayout()
     label = QLabel('input file name')
-    filebox = QLineEdit('sample.undata')
+    filebox = QLineEdit('sample.data')
     
     sublayout.addWidget(label)
     sublayout.addWidget(filebox)

@@ -95,6 +95,9 @@ C           INPUT PARAMETER.
 C           MASS OF INCIDENT ION.
       REAL*8 MION1
 C               INVERSE MASS.
+
+c     Charge of the ion
+      integer qion
 C
 C CRYSTAL:    ALL THIS IS IN COMMON/XTAL/ AND COMMON/MASS/.
 C
@@ -265,6 +268,7 @@ COMMON!!
         COMMON/TYPES/NTYPES
       COMMON/MASS/MASS,MION,TYPEAT
         COMMON/MINV/MASS1,MION1
+        common/projectile/qion
       COMMON/NRG/DEMAX,DEMIN,ABSERR,DELLOW,DELT0
       COMMON/STATS/DELMIN,NCALLS,NSTEPS,TIME
         COMMON/SWITCH/PLOT,PLOTAT,RECOIL
@@ -307,6 +311,7 @@ C     DATA PI/3.1415 92653 58979/
       ISTORE=0
       TPOINT=0
       plot=0
+      qion = 1
       PLOTAT=.FALSE.
       START=.TRUE.
 C
