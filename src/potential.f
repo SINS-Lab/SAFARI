@@ -126,15 +126,18 @@ C IMAGE CHARGE POTENTIAL
 C
       DOUBLE PRECISION FUNCTION VIMZ(Z)
       IMPLICIT REAL*8 (A-H,O-Z)
+      integer qion
       COMMON/POTPAR/POTPAR(30),PIMPAR(10),IPOT,IIMPOT
       DATA ESQR/14.398D0/
+      common/projectile/qion
 C E**2=HBAR*C*ALPHA=1973/137 EV-A.
       IF(IIMPOT.EQ.1) THEN
          ZMIN=PIMPAR(1)
          VMIN=PIMPAR(2)
          IF(Z.GT.ZMIN) THEN
-            VIMZ=-.25D0*ESQR/DSQRT((Z-ZMIN)*(Z-ZMIN)
-     1                    +(.25D0*ESQR/VMIN)*(.25D0*ESQR/VMIN))
+            VIMZ=-.25D0*ESQR*qion/DSQRT((Z-ZMIN)*(Z-ZMIN)
+     1                    +(.25D0*ESQR*qion/VMIN)
+     2                    *(.25D0*ESQR*qion/VMIN))
          ELSE
             VIMZ=-VMIN
          ENDIF
@@ -156,7 +159,8 @@ C E**2=HBAR*C*ALPHA=1973/137 EV-A.
          ZMIN=PIMPAR(1)
          VMIN=PIMPAR(2)
          IF(Z.GT.ZMIN) THEN
-            DVIMDZ=(Z-ZMIN)*(Z-ZMIN)+(.25D0*ESQR/VMIN)*(.25D0*ESQR/VMIN)
+            DVIMDZ=(Z-ZMIN)*(Z-ZMIN)+(.25D0*ESQR*qion/VMIN)
+     &                              *(.25D0*ESQR*qion/VMIN)
             DVIMDZ=.25D0*qion*ESQR*(Z-ZMIN)/((DVIMDZ)**1.5)
          ELSE
             DVIMDZ=0.0D0

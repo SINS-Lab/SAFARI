@@ -96,7 +96,7 @@ C           MASS OF INCIDENT ION.
       REAL*8 MION1
 C               INVERSE MASS.
 
-c     Charge of the ion
+c     Charge of the ion squared, used for image potentials.
       integer qion
 C
 C CRYSTAL:    ALL THIS IS IN COMMON/XTAL/ AND COMMON/MASS/.
