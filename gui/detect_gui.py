@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QApplication
-from PyQt5.QtWidgets import QGridLayout, QHBoxLayout, QVBoxLayout
-from PyQt5.QtWidgets import QLineEdit, QLabel, QPushButton, QRadioButton
+from PyQt5.QtWidgets import QGridLayout, QHBoxLayout, QVBoxLayout, QComboBox
+from PyQt5.QtWidgets import QLineEdit, QLabel, QPushButton
 from scipy.io import FortranFile
 import os
 import math
@@ -156,6 +156,7 @@ class Detector:
         for i in range(numpoints):
             out.write(str(angles[i])+'\t'+str(intensity[i])+'\n')
         out.close()
+        plt.close()
         plt.figure('I_T')
         plt.plot(angles, intensity)
         plt.suptitle("Detections: "+str(len(aArr)))
@@ -181,6 +182,7 @@ class Detector:
         for i in range(numpoints):
             out.write(str(energy[i])+'\t'+str(intensity[i])+'\n')
         out.close()
+        plt.close()
         plt.figure('I_E')
         plt.plot(energy, intensity)
         plt.suptitle("Detections: "+str(len(aArr)))
@@ -192,6 +194,7 @@ class Detector:
         x = self.detections[...,0]
         y = self.detections[...,1]
         
+        plt.close()
         plt.figure('X_Y')
         plt.scatter(x, y)
         plt.suptitle("Detections: "+str(len(x)))
@@ -245,6 +248,7 @@ class Spectrum:
 
     def __init__(self):
         self.detector = None
+        self.box_emin = None
         self.rawData = []
         self.data = []
 
@@ -258,7 +262,7 @@ class Spectrum:
             self.data.append(data[i])
 
         # If this is not the case, someone should have predefined the detector elsewhere.
-        if detectorType == -1:
+        if self.detector is None:
             self.detectorType = self.data[1][0]
             self.detectorParams = self.data[2]
             if self.detectorType == 1:
@@ -306,6 +310,7 @@ class Spectrum:
         print(np.min(c))
         colour = [(var,0,0) for var in c]
         
+        plt.close()
         plt.figure('E_T')
         plt.scatter(x, y, c=colour)
         plt.suptitle("Detections: "+str(len(x)))
@@ -337,6 +342,7 @@ class Spectrum:
         print(np.min(c))
         colour = [(var,0,0) for var in c]
         
+        plt.close()
         plt.figure('T_P')
         plt.scatter(x, y, c=colour)
         plt.suptitle("Detections: "+str(len(x)))
@@ -344,20 +350,101 @@ class Spectrum:
         plt.ylabel('Theta Angle')
         plt.show()
         
+    def detectorSelection(self):
+        dropdown = QComboBox()
+        
+        dropdown.addItem('Spot')
+        dropdown.addItem('Stripe')
+        
+        self.detectorDropdown = dropdown
+        
+        return dropdown
+    
+    def getDetectorType(self):
+        return self.detectorDropdown.currentText()
+        
+    def detectorSettings(self):
+        '''When the button is pressed, this should
+           Provide settings for the type of detector selected'''
+        layout = QVBoxLayout()
+        dtype = self.getDetectorType()
+        
+        self.popup2 = QWidget()
+        window = self.popup2
+        
+        if self.box_emin is None:
+            self.box_emin = QLineEdit(str(self.data[0][0]))
+            self.box_emax = QLineEdit(str(self.data[0][1]))
+            self.box_phimin = QLineEdit('45')
+            self.box_phimax = QLineEdit('45')
+            self.box_thetamin = QLineEdit('55')
+            self.box_thetamax = QLineEdit('55')
+            self.box_eres = QLineEdit(str(self.data[0][2]))
+            self.box_ares = QLineEdit('3')
+        
+        if dtype == 'Spot':
+            layout.addWidget(QLabel('phi'))
+            layout.addWidget(self.box_phimin)
+            layout.addWidget(QLabel('theta'))
+            layout.addWidget(self.box_thetamin)
+            layout.addWidget(QLabel('resolution'))
+            layout.addWidget(self.box_ares)
+        elif dtype == 'Stripe':
+            print(dtype)
+            
+            
+        # Button to close the window
+        close = QPushButton('Done')
+        def done():
+            # Update the detector
+            if dtype == 'Spot':
+                phi = float(self.box_phimin.displayText())
+                theta = float(self.box_thetamin.displayText())
+                ares = float(self.box_ares.displayText())
+                self.detector = SpotDetector(theta, phi, ares)
+            elif dtype == 'Stripe':
+                print(dtype)
+            
+            window.close()
+        close.clicked.connect(done)
+        layout.addWidget(close)
+        window.setLayout(layout)
+        window.show()
+        return
+    
+    def setDetector(self, data):
+        
+        return
+        
 
     def run(self, data):
         self.popup = QWidget()
+        self.data = data
         window = self.popup
         layout = QVBoxLayout()
         sublayout = QHBoxLayout()
+        dtectlayout = QHBoxLayout()
         ellayout = QHBoxLayout()
         anglelayout = QHBoxLayout()
+        
+        # Dropdown selector for detector types
+        dtectlayout.addWidget(self.detectorSelection())
+        
+        dtectbutton = QPushButton('Detector Settings')
+        def run():
+            try:
+                self.detectorSettings()
+            except Exception as e:
+                print(e)
+                pass
+        dtectbutton.clicked.connect(run)
+        dtectlayout.addWidget(dtectbutton)
+        
+        
+        layout.addLayout(dtectlayout)
+        
 
         # Fields to enter values for stuff
-        useDefaults = QRadioButton('Default Spot Detector')
-        useDefaults.setChecked(True)
-        ellayout.addWidget(useDefaults)
-
         label = QLabel('emin')
         emin = QLineEdit(str(data[0][0]))
         sublayout.addWidget(label)
@@ -438,12 +525,7 @@ class Spectrum:
         runbutton = QPushButton('I vs Energy')
         def run():
             try:
-                var = -1
-                if not useDefaults.isChecked():
-                    var = 1
-                    self.detector = SpotDetector(float(thmax.displayText()),\
-                                                 float(phimax.displayText()),\
-                                                 float(ares.displayText()))
+                self.setDetector(data)
                 self.clean(data,emin=float(emin.displayText()),\
                                 emax=float(emax.displayText()),\
                                 phimin=float(phimin.displayText()),\
@@ -451,7 +533,7 @@ class Spectrum:
                                 thmin=float(thmin.displayText()),\
                                 thmax=float(thmax.displayText()),\
                                 lmin=float(lmin.displayText()),\
-                                lmax=float(lmax.displayText()), detectorType=var)
+                                lmax=float(lmax.displayText()))
                 self.detector.spectrum(res=float(eres.displayText()))
             except Exception as e:
                 print(e)
@@ -476,7 +558,7 @@ class Spectrum:
                                 thmin=float(thmin.displayText()),\
                                 thmax=float(thmax.displayText()),\
                                 lmin=float(lmin.displayText()),\
-                                lmax=float(lmax.displayText()), detectorType=0)
+                                lmax=float(lmax.displayText()))
                 print('make spectrum')
                 self.detector.spectrumT(res=float(ares.displayText()))
                 print('done')
@@ -490,6 +572,7 @@ class Spectrum:
         etbutton = QPushButton('E vs Theta')
         def runET():
             try:
+                self.setDetector(data)
                 self.clean(data,emin=float(emin.displayText()),\
                                 emax=float(emax.displayText()),\
                                 phimin=float(phimin.displayText()),\
@@ -509,6 +592,11 @@ class Spectrum:
         tpbutton = QPushButton('Theta vs Phi')
         def runTP():
             try:
+                print('init detector')
+                self.detector = StripeDetector(float(thmin.displayText()),\
+                                               float(thmax.displayText()),\
+                                               float(phimin.displayText()),\
+                                               float(phimax.displayText()))
                 self.clean(data,emin=float(emin.displayText()),\
                                 emax=float(emax.displayText()),\
                                 phimin=float(phimin.displayText()),\
@@ -528,12 +616,7 @@ class Spectrum:
         impbutton = QPushButton('Impact Plot')
         def runIMP():
             try:
-                var = -1
-                if not useDefaults.isChecked():
-                    var = 1
-                    self.detector = SpotDetector(float(thmax.displayText()),\
-                                                 float(phimax.displayText()),\
-                                                 float(ares.displayText()))
+                self.setDetector(data)
                 self.clean(data,emin=float(emin.displayText()),\
                                 emax=float(emax.displayText()),\
                                 phimin=float(phimin.displayText()),\
