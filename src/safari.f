@@ -381,23 +381,39 @@ C       IMAGES ARE FLAT THIS FAR OUT
       ELSE
          PZ1=PZ0
       ENDIF
-c start timing
-      timer=dtime(tarray)
 C
 C PREPARE FOR THERMAL EFFECTS
 c     write(6,*) 'calling tsetup'
       CALL TSETUP(TEMP)
 c     write(6,*) 'back from tsetup'
+
+c start timing
+      timer=dtime(tarray)
+
 C FOR CHAIN CALCULATIONS AND MONTE CARLO:  REQUIRES MAXDIV.EQ.MINDIV.EQ.1
       IF(MAXDIV.EQ.MINDIV.AND.MAXDIV.EQ.1) THEN
+
+*        If only 1, we should output a plot file as well.
+         if(numcha.eq.1) then
+            PLOT = 11
+            Fname=finput(1:linput)//'.xyz'
+            open(unit=11,form='formatted',file=Fname)
+*           Run a single chainscat, then quit
+            call chainscat(OFFX, OFFY, PX0, PY0, PZ1, NPART)
+            go to 777
+         endif
+
+
 C IF NWRITX AND NWRITY .EQ.666 THEN DO MONTE CARLO
          IF(NWRITX.EQ.666 .AND. NWRITY.EQ.666) THEN
             call montecarlo(OFFX, OFFY, PX0, PY0, PZ1, NPART)
+*           Do Output
             go to 777
          ENDIF
 
 *        Assume we want a chain calculation instead.
          call chainscat(OFFX, OFFY, PX0, PY0, PZ1, NPART)
+*        Do Output
          go to 777
       ENDIF
 C THE EFFECTIVE PRIMARY CELL HAS SIDES AXPRIM AND AYPRIM.
@@ -805,6 +821,10 @@ C9031 format(1x, 'impact: x=',d15.7,' y=',d15.7)
       close(9)
       close(10)
       close(66)
+      if(PLOT.NE.0) then
+        close(PLOT)
+      endif
+
       stop
 
 C

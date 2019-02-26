@@ -1,4 +1,4 @@
-      SUBROUTINE TRAJ(DELT,XDIST,YDIST,ZDIST,NPART)
+      SUBROUTINE TRAJ(DELT,XDIST,YDIST,ZDIST,NPART,NPART0)
 C
 C THIS VERSION SUPPORTS TRAJECTORY PLOTTING.
 C
@@ -251,26 +251,15 @@ C
 C PLOT TRAJECTORY, IF DESIRED. (ONLY FOR ION PROGRAM.)
       nsteps=nsteps+1
       time=time+delt
-      IF(PLOT.GT.0 .AND. NSTEPS.LE.4999) THEN
-         WRITE(PLOT,3300) X,Y,Z,TIME
-         IF(PLOTAT) THEN
-            DO 55 I=1,NPART
-55             WRITE(PLOT,3300) XAT(I),YAT(I),ZAT(I),TIME
-            WRITE(PLOT,3300)
-         ENDIF
-C   the following is a call to a procedure in C which flushes the stardard
-C   output buffer.  It is needed for the movies.  The reason it's needed
-C   is that only when FORTRAN writes to a pipe (the only time you might ever
-C   want the output UNbuffered), the output is buffered.  Dreadfully
-C   annoying.  Anyhow, FORTRAN has no flush.  ENDFILE forces a flush, but
-C   the IBM (the only machine we need this on) doesn't allow ENDFILE on a
-C   pipe.  Yet more annoying.  Oh, if SAFARI were written in C!
-C IF on the CONVEX, USE
-C        ** Sorry.  No good solution. **
-C ELSE IF on the IBM RSC6000, USE
-c         call flshso()
-C END COMMENT IF
-3300     FORMAT(1X,4(F12.7))
+      IF(PLOT.GT.0) THEN
+          write(PLOT,*) (1 + NPART0)
+          write(PLOT,*) time
+          write(PLOT,*) 'A',X, Y, Z, PX, PY, PZ, MION
+
+          DO 55 I=1,NPART0
+            write(PLOT,*) 'B',XAT(I), YAT(I), ZAT(I),
+     &                     PXAT(I), PYAT(I), PZAT(I), MASS((TYPEAT(I)))
+55       CONTINUE
       ENDIF
 C
 c it will be buried if it penetrates deeper than -bdist

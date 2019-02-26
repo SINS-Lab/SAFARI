@@ -24,5 +24,6 @@ c     Units and what they do:
 c       20 - safari.input
 c       9  - The file specified in safari.input
 c       10 - the param file with general output
+c       11 - xyz data output file
 c       13 - Unformatted data output file
 c       66 - Formatted data output file
