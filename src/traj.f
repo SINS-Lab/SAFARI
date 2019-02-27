@@ -113,8 +113,6 @@ C
       common/depth/depth
       common/vtot/vtot
 C INITIALIZE.
-C     WRITE(6,*) 'P0(1)= ',P0(1)
-C     WRITE(6,*) 'X0(1)= ',X0(1)
       X=X0(1)
       Y=X0(2)
       Z=X0(3)
@@ -139,8 +137,6 @@ C       GET TIME DERIVATIVES.
      1                  PXAT,PYAT,PZAT,NPART,0)
 C
 C       PREDICT, AND STORE CURRENT DERIVATIVES.
-C     WRITE(6,*) DPX,DPY,DPZ
-C     WRITE(6,*) 'DX= ',DX, 'DPX= ',DPX
       XP=X+DELT*(DX+.5*DELT*MION1*DPX)
       YP=Y+DELT*(DY+.5*DELT*MION1*DPY)
       ZP=Z+DELT*(DZ+.5*DELT*MION1*DPZ)
@@ -228,14 +224,12 @@ C COMPUTE CORRECTED POSITIONS.
       X=XP+EX
       Y=YP+EY
       Z=ZP+EZ
-c     WRITE(6,*) X,Y,Z
       if(z.lt.depth) then
          depth=z
       endif
       PX=PXP
       PY=PYP
       PZ=PZP
-C     WRITE(6,*) 'PX= ',PX
       IF(RECOIL) THEN
 CVDIR ASSUME COUNT(6)
          DO 50 I=1,NPART
@@ -247,20 +241,7 @@ CVDIR ASSUME COUNT(6)
             PZAT(I)=PZATP(I)
 50       CONTINUE
       ENDIF
-C
-C PLOT TRAJECTORY, IF DESIRED. (ONLY FOR ION PROGRAM.)
       nsteps=nsteps+1
-      time=time+delt
-      IF(PLOT.GT.0) THEN
-          write(PLOT,*) (1 + NPART0)
-          write(PLOT,*) time
-          write(PLOT,*) 'A',X, Y, Z, PX, PY, PZ, MION
-
-          DO 55 I=1,NPART0
-            write(PLOT,*) 'B',XAT(I), YAT(I), ZAT(I),
-     &                     PXAT(I), PYAT(I), PZAT(I), MASS((TYPEAT(I)))
-55       CONTINUE
-      ENDIF
 C
 c it will be buried if it penetrates deeper than -bdist
 c it will be stuck if , in traj, its k.e. plus potential energy falls
@@ -282,6 +263,20 @@ C FIND NEW TIME STEP.
       ELSE IF(DELT.LT.DELLOW) THEN
          DELT=DELLOW
       ENDIF
+C
+C PLOT TRAJECTORY, IF DESIRED.
+      time=time+delt
+      IF(PLOT.GT.0) THEN
+          write(PLOT,*) (1 + NPART0)
+          write(PLOT,*) time
+          write(PLOT,*) 'A',X, Y, Z, PX, PY, PZ, MION
+
+          DO 55 I=1,NPART0
+            write(PLOT,*) 'B',XAT(I), YAT(I), ZAT(I),
+     &                     PXAT(I), PYAT(I), PZAT(I), MASS((TYPEAT(I)))
+55       CONTINUE
+      ENDIF
+
 C GONE FAR ENOUGH?
       IF(DABS(X-X0(1)).GE.XDIST .OR. DABS(Y-X0(2)).GE.YDIST .OR.
      1                  DABS(Z-X0(3)).GE.ZDIST) THEN
@@ -304,8 +299,6 @@ CVDIR ASSUME COUNT(6)
       ENDIF
 C
 C TAKE ANOTHER STEP.
-c     n=n+1
-c     write(34,*) n,delt
       GO TO 1
 
 666   CONTINUE

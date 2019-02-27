@@ -293,7 +293,6 @@ COMMON!!
         COMMON/CHAIN/XSTART,YSTART,XSTEP,YSTEP,NUMCHA
       COMMON/UTILTY/DZERO, XNULL(4), PI
 
-C     DATA PI/3.1415 92653 58979/
       DATA SW,SE,NW,NE/5,6,9,10/
       PI=2.0d0*dasin(1.0d0)
       DZERO = 1.0D-10
@@ -318,6 +317,7 @@ C
 C
       KK=0
       ITOTJ=0
+
 C      Get names for input file and crystal file
       open(20,status='old',file='safari.input',form='formatted')
       read(20,'(A)') finput
@@ -331,17 +331,14 @@ C      Get names for input file and crystal file
       open(unit=13,form='unformatted',file=Fname)
       Fname=finput(1:linput)//'.data'
       open(unit=66,form='formatted',file=Fname)
-C     Fname=finput(1:linput)//'.square'
-c     open(unit=22,form='formatted',file=Fname)
+
 C GET INPUT.
       EDIF=-1.0D0
       ADIF=-1.0D0
       CALL INPUTS
 C
 C SET UP THE DETECTOR.
-c     write(6,*) 'calling Dsetup'
       CALL DSETUP(NDTECT)
-c     write(6,*) 'back from Dsetup'
 C Call dtput to write detector parameters to data files
       Call dtput
 C
@@ -383,9 +380,7 @@ C       IMAGES ARE FLAT THIS FAR OUT
       ENDIF
 C
 C PREPARE FOR THERMAL EFFECTS
-c     write(6,*) 'calling tsetup'
       CALL TSETUP(TEMP)
-c     write(6,*) 'back from tsetup'
 
 c start timing
       timer=dtime(tarray)
@@ -402,7 +397,6 @@ C FOR CHAIN CALCULATIONS AND MONTE CARLO:  REQUIRES MAXDIV.EQ.MINDIV.EQ.1
             call chainscat(OFFX, OFFY, PX0, PY0, PZ1, NPART)
             go to 777
          endif
-
 
 C IF NWRITX AND NWRITY .EQ.666 THEN DO MONTE CARLO
          IF(NWRITX.EQ.666 .AND. NWRITY.EQ.666) THEN
@@ -713,9 +707,9 @@ C
             IF(CPOINT.GT.(NARRAY-3)) GO TO 6667
 C
 C THE TRAJECTORIES AT THE CORNERS OF THE SUBCELLS ARE ALL COMPUTED.
-            IF(NDIV.EQ.MAXDIV) THEN
+*            IF(NDIV.EQ.MAXDIV) THEN
 C              WRITE(6,8888)
-            ENDIF
+*            ENDIF
 C8888        FORMAT(' AT SMALLEST GRID SIZE.')
 C
 C LOOP THROUGH THE NEW CELLS. TRY TO STORE DATA IN DETECT, IF IMPOSSIBLE
@@ -784,19 +778,12 @@ C COMPUTE ENERGY AND ANGLE AVERAGES
 C
       WRITE(10,7334) EDIF,ADIF
 7334  FORMAT(1X,'MAX EDIF = ',F12.6,' MAX ADIF = ',F12.6)
-C IF on the CONVEX, USE
+
+*     Conclude Timer
       TIMER=dtime(tarray)
       write(10,9101) tarray(1)
       write(10,9102) tarray(2)
-C ELSE IF on the RSC6000, USE
-C      ITIMER=mclock()
-C      TIMER=ITIMER/100.0
-C      WRITE(10,9101) TIMER
-C END COMMENT IF
-c3003 write(10,9030) oldr
-C9030 format(1x,'max lattice displacement = ',d15.8)
-c     write(10,9031) xold,yold
-C9031 format(1x, 'impact: x=',d15.7,' y=',d15.7)
+
       close(13)
       close(9)
       close(10)
