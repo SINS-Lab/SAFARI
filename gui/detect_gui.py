@@ -6,6 +6,9 @@ import os
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
+from matplotlib.collections import PatchCollection
+import safari_input
 
 def read(f, first, data):
     if first:
@@ -190,20 +193,36 @@ class Detector:
         plt.ylabel('Intensity')
         plt.show()
         
-    def impactParam(self):
+    def impactParam(self, basis = None, dx=0, dy=0):
         x = self.detections[...,0]
         y = self.detections[...,1]
-        
         plt.close()
-        plt.figure('X_Y')
-        plt.scatter(x, y)
-        plt.suptitle("Detections: "+str(len(x)))
+        fig, ax = plt.subplots()
+        ax.scatter(x, y)
+
+        if basis is not None:
+            patches = []
+            colours = []
+            for site in basis:
+                for i in range(2):
+
+                    for j in range(2):
+
+                        #TODO better colouring.
+                        colours.append(1)
+                        circle = Circle((site[0]+i*dx, site[1]+j*dy), 1)
+                        patches.append(circle)
+
+            p = PatchCollection(patches, alpha=0.4)
+            p.set_array(np.array(colours))
+            ax.add_collection(p)
+            print(basis)
+
+        ax.set_title("Detections: "+str(len(x)))
         plt.xlabel('X Impact (Angstroms)')
         plt.ylabel('Y Impact (Angstroms)')
-        plt.show()
+        fig.show()
         
-
-
 class StripeDetector(Detector):
     
     def __init__(self, theta1, theta2, phi, width):
@@ -249,6 +268,14 @@ class Spectrum:
     def __init__(self):
         self.detector = None
         self.box_emin = None
+        self.safio = None
+        self.rawData = []
+        self.data = []
+
+    def clear(self):
+        self.detector = None
+        self.box_emin = None
+        self.safio = None
         self.rawData = []
         self.data = []
 
@@ -625,7 +652,9 @@ class Spectrum:
                                 thmax=float(thmax.displayText()),\
                                 lmin=float(lmin.displayText()),\
                                 lmax=float(lmax.displayText()), detectorType=var)
-                self.detector.impactParam()
+                self.detector.impactParam(self.safio.BASIS,
+                                         self.safio.AX, 
+                                         self.safio.AY)
             except Exception as e:
                 print(e)
                 pass
@@ -642,7 +671,7 @@ class Spectrum:
         window.show()
         return
 
-def run(spectrum, impact, display, glean):
+def run(spectrum):
     app = QApplication([])
     window = QWidget()
     layout = QGridLayout()
@@ -664,6 +693,17 @@ def run(spectrum, impact, display, glean):
     def push():
         data = load(filebox.displayText())
         try:
+            spectrum.clear()
+            file = filebox.displayText()
+            if file.endswith('.data'):
+                file = file.replace('.data', '.input')
+            if file.endswith('.txt'):
+                file = file.replace('.txt', '.input')
+            if file.endswith('.undata'):
+                file = file.replace('.undata', '.input')
+            if file.endswith('.npy'):
+                file = file.replace('.npy', '.input')
+            spectrum.safio = safari_input.SafariInput(file)
             spectrum.run(data)
         except Exception as e:
             print(e)
@@ -687,4 +727,4 @@ def run(spectrum, impact, display, glean):
 
 if __name__ == '__main__':
     spectrum = Spectrum()
-    run(spectrum, None, None, None)
+    run(spectrum)
