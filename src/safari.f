@@ -253,8 +253,8 @@ C THERMAL VARIABLES
       INTEGER NITER
 C NITER = NUMBER OF CONFIGURATIONS TO USE
 C
-      Character*25 finput
-      Character*50 Fname
+      Character*50 finput
+      Character*75 Fname
 C Variables for CONVEX timing
       REAL TARRAY(2), TIMER
 C Variable for IBM RSC6000 timing
