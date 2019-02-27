@@ -216,7 +216,6 @@ class Detector:
                 if site[2] < minz:
                     minz = site[2]
                 for i in range(2):
-
                     for j in range(2):
                         colours.append(site[2])
                         circle = Circle((site[0]+i*dx, site[1]+j*dy), 1)
@@ -256,14 +255,14 @@ class Detector:
             selected.set_height(sh)
             selected.set_width(sw)
             fig.canvas.draw()
-        
-        
+
         def onclick(event):
             print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %\
                  ('double' if event.dblclick else 'single', event.button,\
                    event.x, event.y, event.xdata, event.ydata))
             close = [1e20, 1e20]
             distsq = close[0]**2 + close[1]**2
+            index = -1
             for i in range(len(x)):
                 dxsq = (x[i]-event.xdata)**2
                 dysq = (y[i]-event.ydata)**2
@@ -271,6 +270,9 @@ class Detector:
                     distsq = dxsq + dysq
                     close[0] = x[i]
                     close[1] = y[i]
+                    index = i
+            print(close)
+            print(self.detections[3][index])
             sh = (ax.get_ylim()[1]-ax.get_ylim()[0])/scale
             sw = (ax.get_xlim()[1]-ax.get_xlim()[0])/scale
             selected.set_height(sh)
@@ -645,6 +647,7 @@ class Spectrum:
         def runIT():
             try:
                 print('init detector')
+                detector = self.detector
                 self.detector = StripeDetector(float(thmin.displayText()),\
                                                float(thmax.displayText()),\
                                                float(phimin.displayText()),\
@@ -660,6 +663,7 @@ class Spectrum:
                                 lmax=float(lmax.displayText()))
                 print('make spectrum')
                 self.detector.spectrumT(res=float(ares.displayText()))
+                self.detector = detector
                 print('done')
             except Exception as e:
                 print(e)
@@ -692,6 +696,7 @@ class Spectrum:
         def runTP():
             try:
                 print('init detector')
+                detector = self.detector
                 self.detector = StripeDetector(float(thmin.displayText()),\
                                                float(thmax.displayText()),\
                                                float(phimin.displayText()),\
@@ -705,6 +710,7 @@ class Spectrum:
                                 lmin=float(lmin.displayText()),\
                                 lmax=float(lmax.displayText()))
                 self.plotPhiTheta()
+                self.detector = detector
             except Exception as e:
                 print(e)
                 pass
