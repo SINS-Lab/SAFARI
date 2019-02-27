@@ -6,6 +6,7 @@ import os
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 from matplotlib.patches import Circle
 from matplotlib.collections import PatchCollection
 import safari_input
@@ -159,13 +160,12 @@ class Detector:
         for i in range(numpoints):
             out.write(str(angles[i])+'\t'+str(intensity[i])+'\n')
         out.close()
-        plt.close()
-        plt.figure('I_T')
-        plt.plot(angles, intensity)
-        plt.suptitle("Detections: "+str(len(aArr)))
-        plt.xlabel('Angle')
-        plt.ylabel('Intensity')
-        plt.show()
+        fig, ax = plt.subplots()
+        ax.plot(angles, intensity)
+        ax.set_title("Intensity vs Theta, Detections: "+str(len(aArr)))
+        ax.set_xlabel('Angle')
+        ax.set_ylabel('Intensity')
+        fig.show()
 
 
     def spectrumE(self, res, numpoints=1000):
@@ -185,42 +185,103 @@ class Detector:
         for i in range(numpoints):
             out.write(str(energy[i])+'\t'+str(intensity[i])+'\n')
         out.close()
-        plt.close()
-        plt.figure('I_E')
-        plt.plot(energy, intensity)
-        plt.suptitle("Detections: "+str(len(aArr)))
-        plt.xlabel('Energy')
-        plt.ylabel('Intensity')
-        plt.show()
+        fig, ax = plt.subplots()
+        ax.plot(energy, intensity)
+        ax.set_title("I_E, Detections: "+str(len(aArr)))
+        ax.set_xlabel('Energy')
+        ax.set_ylabel('Intensity')
+        fig.show()
         
     def impactParam(self, basis = None, dx=0, dy=0):
         x = self.detections[...,0]
         y = self.detections[...,1]
-        plt.close()
+        
         fig, ax = plt.subplots()
-        ax.scatter(x, y)
-
+        patches = []
+        colours = []
+        
+        maxX = dx
+        maxY = dy
+        
+        if dx == 0 and dy == 2:
+            maxX = np.max(x)
+            maxY = np.max(y)
+        
+        ax.set_xlim(right=maxX)
+        ax.set_ylim(top=maxY)
+        
         if basis is not None:
-            patches = []
-            colours = []
+            minz = 1e6
             for site in basis:
+                if site[2] < minz:
+                    minz = site[2]
                 for i in range(2):
 
                     for j in range(2):
-
-                        #TODO better colouring.
-                        colours.append(1)
+                        colours.append(site[2])
                         circle = Circle((site[0]+i*dx, site[1]+j*dy), 1)
                         patches.append(circle)
 
-            p = PatchCollection(patches, alpha=0.4)
-            p.set_array(np.array(colours))
-            ax.add_collection(p)
-            print(basis)
+#        #TODO better colouring.
+#        for i in range(len(site)):
+#            site[i] = site[i] - minz
 
+        p = PatchCollection(patches, alpha=0.4)
+        p.set_array(np.array(colours))
+        
+        #Draw the basis
+        ax.add_collection(p)
+        
+        #Draw Selected box
+        scale = 50
+        sh = (ax.get_ylim()[1]-ax.get_ylim()[0])/scale
+        sw = (ax.get_xlim()[1]-ax.get_xlim()[0])/scale
+        selected = Rectangle((0,0),sw,sh,facecolor=None,edgecolor='red')
+        selected.set_alpha(0.4)
+        ax.add_patch(selected)
+            
+        #Draw the points
+        ax.scatter(x, y)
+        
+        #Add a heightmap
+        fig.colorbar(p, ax=ax)
+        
         ax.set_title("Detections: "+str(len(x)))
-        plt.xlabel('X Impact (Angstroms)')
-        plt.ylabel('Y Impact (Angstroms)')
+        ax.set_xlabel('X Target (Angstroms)')
+        ax.set_ylabel('Y Target (Angstroms)')
+        
+        def onResize(event):
+            sh = (ax.get_ylim()[1]-ax.get_ylim()[0])/scale
+            sw = (ax.get_xlim()[1]-ax.get_xlim()[0])/scale
+            selected.set_height(sh)
+            selected.set_width(sw)
+            fig.canvas.draw()
+        
+        
+        def onclick(event):
+            print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %\
+                 ('double' if event.dblclick else 'single', event.button,\
+                   event.x, event.y, event.xdata, event.ydata))
+            close = [1e20, 1e20]
+            distsq = close[0]**2 + close[1]**2
+            for i in range(len(x)):
+                dxsq = (x[i]-event.xdata)**2
+                dysq = (y[i]-event.ydata)**2
+                if distsq > dxsq + dysq:
+                    distsq = dxsq + dysq
+                    close[0] = x[i]
+                    close[1] = y[i]
+            sh = (ax.get_ylim()[1]-ax.get_ylim()[0])/scale
+            sw = (ax.get_xlim()[1]-ax.get_xlim()[0])/scale
+            selected.set_height(sh)
+            selected.set_width(sw)
+            selected.set_xy((close[0] - sw/2, close[1] - sh/2))
+            fig.canvas.draw()
+                
+        
+        fig.canvas.mpl_connect('button_press_event', onclick)
+        fig.canvas.mpl_connect('resize_event', onResize)
+        
         fig.show()
         
 class StripeDetector(Detector):
@@ -270,6 +331,8 @@ class Spectrum:
         self.box_emin = None
         self.safio = None
         self.rawData = []
+        self.stuck = []
+        self.buried = []
         self.data = []
 
     def clear(self):
@@ -277,6 +340,8 @@ class Spectrum:
         self.box_emin = None
         self.safio = None
         self.rawData = []
+        self.stuck = []
+        self.buried = []
         self.data = []
 
     def clean(self, data, detectorType=-1, emin=-1e6, emax=1e6,\
@@ -288,12 +353,14 @@ class Spectrum:
         for i in range(0, 4):
             self.data.append(data[i])
 
-        # If this is not the case, someone should have predefined the detector elsewhere.
+        # If this is not the case, detector is defined elsewhere.
         if self.detector is None:
             self.detectorType = self.data[1][0]
             self.detectorParams = self.data[2]
             if self.detectorType == 1:
-                self.detector = SpotDetector(self.detectorParams[0],self.detectorParams[1],self.detectorParams[2])
+                self.detector = SpotDetector(self.detectorParams[0],\
+                                             self.detectorParams[1],\
+                                             self.detectorParams[2])
                 
         if emin!=-1e6:
             self.detector.emin = emin
@@ -306,6 +373,13 @@ class Spectrum:
             t = traj[4]
             p = traj[5]
             l = traj[6]
+            # Stuck
+            if e == -100:
+                self.stuck.append(traj)
+                continue
+            if e == -200:
+                self.buried.append(traj)
+                continue
             if e < emin or e > emax or l > lmax or l < lmin\
             or t > thmax or t < thmin or p > phimax or p < phimin:
                 continue
@@ -337,13 +411,12 @@ class Spectrum:
         print(np.min(c))
         colour = [(var,0,0) for var in c]
         
-        plt.close()
-        plt.figure('E_T')
-        plt.scatter(x, y, c=colour)
-        plt.suptitle("Detections: "+str(len(x)))
-        plt.xlabel('Angle')
-        plt.ylabel('Energy')
-        plt.show()
+        fig, ax = plt.subplots()
+        ax.scatter(x, y, c=colour)
+        ax.set_title("Energy vs Theta, Detections: "+str(len(x)))
+        ax.set_xlabel('Angle (Degrees)')
+        ax.set_ylabel('Energy (eV)')
+        fig.show()
 
     def plotPhiTheta(self):
         
@@ -369,13 +442,12 @@ class Spectrum:
         print(np.min(c))
         colour = [(var,0,0) for var in c]
         
-        plt.close()
-        plt.figure('T_P')
-        plt.scatter(x, y, c=colour)
-        plt.suptitle("Detections: "+str(len(x)))
-        plt.xlabel('Phi Angle')
-        plt.ylabel('Theta Angle')
-        plt.show()
+        fig, ax = plt.subplots()
+        ax.scatter(x, y, c=colour)
+        ax.set_title("Theta vs Phi, Detections: "+str(len(x)))
+        ax.set_xlabel('Phi Angle (Degrees)')
+        ax.set_ylabel('Theta Angle (Degrees)')
+        fig.show()
         
     def detectorSelection(self):
         dropdown = QComboBox()
@@ -651,7 +723,7 @@ class Spectrum:
                                 thmin=float(thmin.displayText()),\
                                 thmax=float(thmax.displayText()),\
                                 lmin=float(lmin.displayText()),\
-                                lmax=float(lmax.displayText()), detectorType=var)
+                                lmax=float(lmax.displayText()))
                 self.detector.impactParam(self.safio.BASIS,
                                          self.safio.AX, 
                                          self.safio.AY)
@@ -693,7 +765,7 @@ def run(spectrum):
     def push():
         data = load(filebox.displayText())
         try:
-            spectrum.clear()
+            spectrum = Spectrum()
             file = filebox.displayText()
             if file.endswith('.data'):
                 file = file.replace('.data', '.input')

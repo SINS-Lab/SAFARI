@@ -9,6 +9,8 @@ gui/dist/*
 gui/*.spec
 gui/*.txt
 misc/*.input
+gui/*.input
+gui/*.param
 gui/*.data
 *.xyz
 */__pycache__/*

@@ -16,9 +16,9 @@ C
       REAL*8 MION,MASS(NTYPEMAX)
       REAL*8 MION1,MASS1(NTYPEMAX),MINVV
       REAL*8 F
-C               F IS A FORCE.
+C            F IS A FORCE.
       REAL*8 XA,YA,ZA
-C           XA IS THE ION-ATOM DISPLACEMENT.
+C            XA IS THE ION-ATOM DISPLACEMENT.
       INTEGER TYPEAT(NPARTMAX)
       LOGICAL IMAGE
       REAL*8 LVR2,LDVDR2,LINDR2
@@ -44,12 +44,11 @@ C
       vtot=0.0d0
 C
 C
-C DX/DT = P/M
+C     DX/DT = P/M
       DX=PX*MION1
       DY=PY*MION1
       DZ=PZ*MION1
 C
-c      write(6,*) "hameq"
 C LOOP THROUGH ATOMS. SUM UP THE FORCES ON THE ATOMS TO GET THE
 C FORCE ON THE ION.
 C     DPX IS THE X COMPONENT OF THE FORCE (DPX/DT) ON THE ION.
@@ -66,27 +65,25 @@ CVDIR ASSUME COUNT(6)
          NAT=TYPEAT(J)
          MINVV=MASS1(NAT)
 
-C           DX/DT FOR SURFACE ATOMS.
+C        DX/DT FOR SURFACE ATOMS.
          DXAT(J)=PXAT(J)*MINVV
          DYAT(J)=PYAT(J)*MINVV
          DZAT(J)=PZAT(J)*MINVV
-C           F=DP/DT=-DV/DX.
-C           XA IS THE X COMPONENT OF THE DISTANCE BETWEEN ION AND ATO
+C        F=DP/DT=-DV/DX.
+C        XA IS THE X COMPONENT OF THE DISTANCE BETWEEN ION AND ATO
          XA=XAT(J)-X
          YA=YAT(J)-Y
          ZA=ZAT(J)-Z
 c
-C               RR IS THE SQUARE OF THE DISTANCE TO THE ION.
-C        WRITE(6,*) 'J= ',J
-C        WRITE(6,*) 'XA = ',XA
+C        RR IS THE SQUARE OF THE DISTANCE TO THE ION.
          RR=XA*XA+YA*YA+ZA*ZA
-C           F IS A COMPONENT OF THE FORCE ON THE ION.
-C               IF ION AND ATOM ARE AT THE SAME PLACE, F=0 BY SYMMETRY.
+
+C        F IS A COMPONENT OF THE FORCE ON THE ION.
+C        IF ION AND ATOM ARE AT THE SAME PLACE, F=0 BY SYMMETRY.
          IF(RR.NE.0.0D0) THEN
-C                 USE DV/DX=(DV/DR**2)*DR**2/DX = (DV/DR**2)*2X.
+C           USE DV/DX=(DV/DR**2)*DR**2/DX = (DV/DR**2)*2X.
             DDR=-2.0D0*LDVDR2(RR,NAT)
             IF(IMAGE .AND. IIMPOT.EQ.2) DDR=DDR-2.0D0*LINDR2(RR)
-c            write(6,*) ddr, rr, nat
             F=DDR*XA
               DPXAT(J)=DPXAT(J)+F
               DPX=DPX-F
@@ -157,7 +154,7 @@ c compute force components
          endif
 100   CONTINUE
       IF(IMAGE) THEN
-C         INCLUDE IMAGE CHARGE FORCE.
+C        INCLUDE IMAGE CHARGE FORCE.
          CALL FIM(X,Y,Z,FX,FY,FZ)
          DPX=DPX+FX
          DPY=DPY+FY
@@ -188,7 +185,7 @@ C
      &                   RR.GT.RRMIN+(NTAB-1)*RRSTEP) THEN
          LVR2=VR(DSQRT(RR),NV)
       ELSE
-C           INTERPOLATE IN THE TABLE.
+C        INTERPOLATE IN THE TABLE.
          WHERE=(RR-RRMIN)*STPINV+1.0D0
          NR=INT(WHERE)
          FRACT=WHERE-NR
@@ -237,11 +234,11 @@ C
       COMMON/ZINV/ZINV
 C
       IF(NTAB.EQ.0 .OR. Z.LT.ZMIN .OR. Z.GT.ZMIN+(NTAB-1)*ZSTEP) THEN
-C           DVIMDZ(Z) IS NOT IN THE TABLE.
+C        DVIMDZ(Z) IS NOT IN THE TABLE.
          LDIMDZ=DVIMDZ(Z)
       ELSE
-C           INTERPOLATE IN THE TABLE.
-C           WHERE=(Z-ZMIN)/ZSTEP+1.0D0
+C        INTERPOLATE IN THE TABLE.
+C        WHERE=(Z-ZMIN)/ZSTEP+1.0D0
          WHERE=(Z-ZMIN)*ZINV+1.0D0
          NZ=INT(WHERE)
          FRACT=WHERE-NZ

@@ -38,6 +38,48 @@
  808  continue
       end
 
+      subroutine gridscat(offx,offy, px0, py0, pz1, npart)
+
+*      Run as a grid simulation, starting from xstart,ystart
+*      and going until fax*ax,fay*ay, in steps of xstep,ystep
+
+      implicit real*8 (a-h,o-z)
+      include "params.txt"
+
+      common/xtal/ax,ay
+      common/detect/area(narray)
+      common/trajs/enrgy(narray),theta(narray),phi(narray)
+      common/other/z1,maxdiv,mindiv,fax,fay
+      common/chain/xstart,ystart,xstep,ystep,numcha
+      common/points/xtraj(narray),ytraj(narray),level(narray)
+      common/moment/px(narray),py(narray),pz(narray)
+      common/random/seed
+
+      ix=int((fax*ax-xstart) / xstep)
+      iy=int((fay*ay-ystart) / ystep)
+      n = ix * iy
+      numcha = n
+*     loop over x
+      do 808 i=1,ix
+*         loop over y
+          do 707 j=1,iy
+              seed=randsf(seed)
+              xtraj(j) = xstart+xstep*(i-1)
+              ytraj(j) = ystart+ystep*(j-1)
+*             Back up from impact point to start
+              x = xtraj(j) - offx
+              y = ytraj(j) - offy
+*             Call SCATTR for this particle
+              call scattr(x,y,z1,px0,py0,pz1,enrgy(j),
+     &             theta(j),phi(j),px(j),py(j),pz(j),npart,j)
+              level(j)=1
+              area(j)=1./(n)
+707       continue
+              nber=iy
+              call output(nber+1)
+ 808  continue
+      end
+
       subroutine chainscat(offx,offy, px0, py0, pz1, npart)
 
 *      Run as a chain simulation, where numcha trajectories
@@ -55,7 +97,6 @@
       common/moment/px(narray),py(narray),pz(narray)
       common/random/seed
 
-C ASSUME CHAIN WANTED.
       do 321 l=1,numcha
 C TAKE CARE OF THERMAL
           seed=randsf(seed)

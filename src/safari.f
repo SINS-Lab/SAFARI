@@ -405,6 +405,13 @@ C IF NWRITX AND NWRITY .EQ.666 THEN DO MONTE CARLO
             go to 777
          ENDIF
 
+C IF NWRITX .EQ.666 and NWRITY.EQ.777 THEN DO Grid
+         IF(NWRITX.EQ.666 .AND. NWRITY.EQ.777) THEN
+            call gridscat(OFFX, OFFY, PX0, PY0, PZ1, NPART)
+*           Do Output
+            go to 777
+         ENDIF
+
 *        Assume we want a chain calculation instead.
          call chainscat(OFFX, OFFY, PX0, PY0, PZ1, NPART)
 *        Do Output
