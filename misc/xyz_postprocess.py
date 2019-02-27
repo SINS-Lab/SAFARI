@@ -2,12 +2,16 @@ from xyz import XYZ
 from xyz import XYZ_Single
 
 class Particle:
+
+    nextid = 0
+
     def __init__(self):
         self.atom = None
         self.pos = [0,0,0]
         self.momentum = [0,0,0]
         self.velocity = [0,0,0]
         self.mass = 0
+        self.id = -1
 
     def fromXYZ(self, atom, value):
         self.atom = atom
@@ -17,12 +21,6 @@ class Particle:
         self.velocity = [value[3]/value[6], \
                          value[4]/value[6], \
                          value[5]/value[6]]
-        
-class ParticlePath:
-    def __init__(self):
-        self.particles=[]
-        
-    
 
 def isSame(p_a, p_b, dt):
     if p_a == p_b:
@@ -46,7 +44,7 @@ def isSame(p_a, p_b, dt):
            (p_a_dt[2] - p_b_dt[2])**2
     return diff <= 1e-0
 
-def merge(pset1, pset2, dt):
+def merge(pset1, pset2, dt, first):
     len1 = len(pset1)
     len2 = len(pset2)
     merged = False
@@ -58,7 +56,16 @@ def merge(pset1, pset2, dt):
             p_b = pset2[j]
             if isSame(p_a, p_b, dt):
                 has = True
-                break
+                if not first:
+                    break
+                if p_b.id != -1:
+                    p_a.id = p_b.id
+                elif p_a.id!=-1:
+                    p_b.id = p_a.id
+                else:
+                    p_a.id = p_b.id = Particle.nextid
+                    Particle.nextid = Particle.nextid + 1
+
         if not has:
             pset2.append(p_a)
             merged = True
@@ -105,27 +112,34 @@ def process(xyz):
             pset1 = particles[i]
             pset2 = particles[i + 1]
             dt = times[i + 1] - times[i]
-            didMerge, num = merge(pset1, pset2, dt)
+            didMerge, num = merge(pset1, pset2, dt, True)
             n = n + num
             merged = merged or didMerge
+        if n == 0:
+            print('Merged '+str(n))
+            print('Number Per Frame: '+str(len(particles[0])))
+            break
         for i in reversed(range(1, len(particles))):
             pset1 = particles[i]
             pset2 = particles[i - 1]
             dt = times[i - 1] - times[i]
-            didMerge, num = merge(pset1, pset2, dt)
+            didMerge, num = merge(pset1, pset2, dt, False)
             n = n + num
             merged = merged or didMerge
         print('Merged '+str(n))
         print('Number Per Frame: '+str(len(particles[0])))
     print('Finished Merging')
     xyz = XYZ()
+    for pset in particles:
+        def key(p):
+            return p.id
+        pset.sort(key=key)
     for i in range(len(times)):
         time = times[i]
         pset = particles[i]
         xyz_single = xyzFromParticles(time, pset)
         xyz.xyzs.append(xyz_single)
     return xyz
-
 
 if __name__ == '__main__':
     xyz = XYZ()
