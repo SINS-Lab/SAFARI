@@ -278,7 +278,7 @@ class Detector:
                 close[1] = round(close[1],2)
                 name = self.safio.fileIn.replace('.input', '')
                 xyz_p.process_file(name +'.xyz',\
-                                    name+str(close[0])+','+str(close[1])+'.xyz')
+                                   name+str(close[0])+','+str(close[1])+'.xyz')
                 print(sub)
 
             close[0] = round(close[0],5)

@@ -267,17 +267,16 @@ C        WILL ONLY USE NPART ATOMS UNLESS THE NEXT ATOM IS JUST A
          IF(NN.GT.NPARTMAX) NN=NPARTMAX
          IF(NN.GT.N) NN=N
 C
-C               LOOP THROUGH THE LOCAL ATOMS IN XLOC.
-C                CALL NOUFL
+C        LOOP THROUGH THE LOCAL ATOMS IN XLOC.
          DO 50 I=1,N
-C                       PUT ION-ATOM DISPLACEMENT IN TEMPORARY REGISTERS
+C           PUT ION-ATOM DISPLACEMENT IN TEMPORARY REGISTERS
             XT=XLOC(1,I)-X(1)
             YT=XLOC(2,I)-X(2)
             ZT=XLOC(3,I)-X(3)
-C                     FIND THE SQUARED DISTANCE RR TO THE ION.
+C           FIND THE SQUARED DISTANCE RR TO THE ION.
             RR=XT*XT+YT*YT+ZT*ZT
-C                       LOOP THROUGH THE CLOSEST ATOMS ALREADY FOUND, AN
-C                       SEE IF THIS ONE IS CLOSER.
+C           LOOP THROUGH THE CLOSEST ATOMS ALREADY FOUND, AN
+C           SEE IF THIS ONE IS CLOSER.
             DO 45 J=1,NN
                IF(RR.GE.R(J)) GO TO 45
 C                   THE ATOM IS CLOSER THAN THE PREVIOUS JTH CLOSEST.
@@ -297,11 +296,7 @@ C              GET THE NEXT ATOM IN THE LOCAL REGION.
                GO TO 50
 45          CONTINUE
 50       CONTINUE
-
-c        What was UFL?
-C        CALL UFL
-C
-C
+c
          NPART1=NPART
 52       CONTINUE
          IF(DABS(R(NPART1+1)-R(NPART)) .LE. .01D0*R(NPART)) THEN
@@ -309,8 +304,8 @@ C
             IF(NPART1 .LT. NPARTMAX) GO TO 52
          ENDIF
 C
-C               MAKE THE LIST OF PARTICIPATING ATOMS (THE NPART CLOSEST)
-C               SEND TO TRAJ.
+C        MAKE THE LIST OF PARTICIPATING ATOMS (THE NPART CLOSEST)
+C        SEND TO TRAJ.
          nat1=typloc(near(1))
          DO 60 J=1,NPART1
             DO 58 I=1,3
@@ -414,9 +409,9 @@ C                A VIRGIN CELL. PUT INITIAL VALUES IN XLOC, ET AL.
                   XLOC(1,INDEX)=XC+XBASIS(1,J)
                   XLOC(2,INDEX)=YC+XBASIS(2,J)
                   XLOC(3,INDEX)=XBASIS(3,J)
-                   XLCLAT(1,INDEX)=XLOC(1,INDEX)
-                   XLCLAT(2,INDEX)=XLOC(2,INDEX)
-                   XLCLAT(3,INDEX)=XLOC(3,INDEX)
+                  XLCLAT(1,INDEX)=XLOC(1,INDEX)
+                  XLCLAT(2,INDEX)=XLOC(2,INDEX)
+                  XLCLAT(3,INDEX)=XLOC(3,INDEX)
                   PLOC(1,INDEX)=0.0D0
                   PLOC(2,INDEX)=0.0D0
                   PLOC(3,INDEX)=0.0D0

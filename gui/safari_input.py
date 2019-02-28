@@ -67,6 +67,7 @@ class SafariInput:
         self.THETA0 = 55.0
         self.PHI0 = 45.0
         self.MASS = 22.989
+        self.SYMION = 'Na'
         self.EMIN = 0.5
         self.EMAX = 1625.0
         self.ESIZE = 16.0
@@ -112,7 +113,7 @@ class SafariInput:
         self.NBASIS = 1
         self.BASIS = [[0.0, 0.0, 0.0, 1]]
         self.NTYPES = 1
-        self.ATOMS = [[107.87, 47]]
+        self.ATOMS = [[107.87, 47, 'Ag']]
         self.SPRINGS = [[5.0, 5.0, 5.0]]
         self.CORR = True
         self.ATOMK = 0
@@ -168,12 +169,13 @@ class SafariInput:
             args = parseLine(line)
             # Number of arguments, used for padding arrays with 0
             num = len(args)
-            # E0 THETA0 PHI0 MASS
+            # E0 THETA0 PHI0 MASS SYMION
             if n == 1:
                 self.E0 = args[0]
                 self.THETA0 = args[1]
                 self.PHI0 = args[2]
                 self.MASS = args[3]
+                self.SYMION = args[4]
             #EMIN,EMAX,ESIZE,ASIZE
             if n == 2:
                 self.EMIN = args[0]
@@ -343,8 +345,8 @@ class SafariInput:
                 else:
                     # Even entries are the atom
                     if o % 2 == 0:
-                        # Mass and Charge
-                        atom = [args[0], args[1]]
+                        # Mass, Charge, and Symbol
+                        atom = [args[0], args[1], args[2]]
                         self.ATOMS.append(atom)
                     #Odd entries are the spring
                     else:
@@ -403,7 +405,7 @@ class SafariInput:
         else:
             output = open(file, 'w')
 
-        file = serialize(self.E0, self.THETA0, self.PHI0, self.MASS) + '\n' \
+        file = serialize(self.E0, self.THETA0, self.PHI0, self.MASS, self.SYMION) + '\n' \
             +  serialize(self.EMIN, self.EMAX, self.ESIZE, self.ASIZE)  + '\n' \
             +  serialize(self.NDTECT)  + '\n' \
             +  serializeArr(self.DTECTPAR)  + '\n' \

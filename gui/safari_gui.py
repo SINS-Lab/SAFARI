@@ -371,13 +371,15 @@ def makeAtomsPopup(safari, layout, label, text, name, subindex):
         window = safari.popup
         layout = QVBoxLayout()
         table = QTableWidget(subindex,5)
-        table.setHorizontalHeaderLabels(['Mass', 'Charge', 'SX', 'SY', 'SZ'])
+        table.setHorizontalHeaderLabels(['Mass', 'Charge', 'Symbol',\
+                                         'SX', 'SY', 'SZ'])
         # Populate the table
         for i in range(subindex):
             atom = safari.ATOMS[i]
             spring = safari.SPRINGS[i]
             table.setItem(i,0,QTableWidgetItem(str(atom[0])))
             table.setItem(i,1,QTableWidgetItem(str(atom[1])))
+            table.setItem(i,1,QTableWidgetItem(str(atom[2])))
             table.setItem(i,2,QTableWidgetItem(str(spring[0])))
             table.setItem(i,3,QTableWidgetItem(str(spring[1])))
             table.setItem(i,4,QTableWidgetItem(str(spring[2])))
@@ -391,6 +393,11 @@ def makeAtomsPopup(safari, layout, label, text, name, subindex):
                 spring = safari.SPRINGS[i]
                 atom[0] = parseVar(table.item(i,0).text())
                 atom[1] = parseVar(table.item(i,1).text())
+                new = parseVar(table.item(i,2).text())
+                old = atom[2]
+                if new != old:
+                    print('Should update mass an charge from table')
+                atom[2] =  new
                 spring[0] = parseVar(table.item(i,2).text())
                 spring[1] = parseVar(table.item(i,3).text())
                 spring[2] = parseVar(table.item(i,4).text())
@@ -437,6 +444,14 @@ def makeInputBox(safari, name, index, subindex, _layout=None):
             text = QLineEdit(str(safari.MASS))
             def edit():
                 safari.MASS = parseVar(text.displayText())
+                safari.save()
+            text.editingFinished.connect(edit)
+        if subindex==4:
+            text = QLineEdit(str(safari.SYMION))
+            def edit():
+                safari.SYMION = parseVar(text.displayText())
+                # TODO if this is set, it should then update
+                # Mass from a lookup table.
                 safari.save()
             text.editingFinished.connect(edit)
     # Second line of the file
@@ -815,6 +830,8 @@ def initBoxes(safari, layout):
     layout.addLayout(box,x,y + 20)
     box = makeInputBox(safari, 'Projectile Mass', 1, 3)
     layout.addLayout(box,x,y + 30)
+    box = makeInputBox(safari, 'Projectile Symbol', 1, 4)
+    layout.addLayout(box,x,y + 40)
     
     x += 10
     box = makeInputBox(safari, 'Minimum Energy', 2, 0)
@@ -955,7 +972,7 @@ def initBoxes(safari, layout):
         print('Generating Safari Input')
         safari.genInputFile()
         print('Running Safari')
-        p = subprocess.Popen(text.displayText().split(), shell=True)
+        subprocess.Popen(text.displayText().split(), shell=True)
         
     run.clicked.connect(push)
     

@@ -95,6 +95,8 @@ C           INPUT PARAMETER.
 C           MASS OF INCIDENT ION.
       REAL*8 MION1
 C               INVERSE MASS.
+      character*2 SYMION
+*     Atomic Symbol for the Ion
 
 c     Charge of the ion squared, used for image potentials.
       integer qion
@@ -118,6 +120,10 @@ C               USED BY SCAT AND DECLARED HERE TO GET THE COMMON BLOCKS
 C           MASSES IN AMU OF SURFACE ATOMS OF VARIOUS TYPES.
       REAL*8 MASS1(NTYPEMAX)
 C               INVERSES OF MASSES.
+
+      character*2 ATSYM(NTYPEMAX)
+*     Atomic symbols for the basis atoms
+
 C
 C INTEGRATION OF TRAJECTORIES:
 C
@@ -266,6 +272,7 @@ COMMON!!
       COMMON/BEAM/E0,THETA0,PHI0
       COMMON/XTAL/AX,AY,XBASIS,TYPBAS,NBASIS
         COMMON/TYPES/NTYPES
+        common/symbols/SYMION,ATSYM
       COMMON/MASS/MASS,MION,TYPEAT
         COMMON/MINV/MASS1,MION1
         common/projectile/qion

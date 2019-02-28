@@ -28,7 +28,8 @@ def isSame(p_a, p_b, dt):
     if p_a.atom != p_b.atom:
         return False
     #always the same for the projectile Atom
-    if p_a.atom == 'A':
+    # TODO make this load from a safari_input as well.
+    if p_a.atom == 'Na':
         return True
     
     p_a_dt = [p_a.pos[0] + p_a.velocity[0]*dt,\

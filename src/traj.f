@@ -94,6 +94,9 @@ C               ALLOW SURFACE ATOMS TO RECOIL.
 C
       LOGICAL PLOTAT
       INTEGER PLOT
+
+      character*2 ATSYM(NTYPEMAX)
+      character*2 SYMION
 C
       REAL*8 MION,MASS(NTYPEMAX)
       REAL*8 MION1,MASS1(NTYPEMAX),M1
@@ -104,6 +107,7 @@ C
       COMMON/HAM/DX,DY,DZ,DPX,DPY,DPZ,DXAT,DYAT,DZAT,DPXAT,DPYAT,DPZAT
       COMMON/NRG/DEMAX,DEMIN,ABSERR,DELLOW,DELT0
       COMMON/MASS/MASS,MION,TYPEAT
+      common/symbols/SYMION,ATSYM
        COMMON/MINV/MASS1,MION1
       COMMON/FLAGS/STUCK,BURIED
       COMMON/STATS/DELMIN,NCALLS,NSTEPS,TIME
@@ -269,10 +273,10 @@ C PLOT TRAJECTORY, IF DESIRED.
       IF(PLOT.GT.0) THEN
           write(PLOT,*) (1 + NPART0)
           write(PLOT,*) time
-          write(PLOT,*) 'A',X, Y, Z, PX, PY, PZ, MION
+          write(PLOT,*) SYMION,X, Y, Z, PX, PY, PZ, MION
 
           DO 55 I=1,NPART0
-            write(PLOT,*) 'B',XAT(I), YAT(I), ZAT(I),
+            write(PLOT,*) ATSYM((TYPEAT(I))),XAT(I), YAT(I), ZAT(I),
      &                     PXAT(I), PYAT(I), PZAT(I), MASS((TYPEAT(I)))
 55       CONTINUE
       ENDIF
