@@ -141,8 +141,14 @@ def process(xyz):
         xyz.xyzs.append(xyz_single)
     return xyz
 
-if __name__ == '__main__':
+def process_file(fileIn, fileOut=None):
+    if fileOut is None:
+        fileOut = fileIn
     xyz = XYZ()
-    xyz.load('sample.xyz')
+    xyz.load(fileIn)
     xyz = process(xyz)
-    xyz.save('sample_mod.xyz')
+    xyz.save(fileOut)
+
+
+if __name__ == '__main__':
+    process_file('sample.xyz', 'sample_mod.xyz')
