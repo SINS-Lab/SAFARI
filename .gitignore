@@ -10,6 +10,7 @@ gui/*.spec
 gui/*.txt
 gui/*.exe
 misc/*.input
+misc/*.output
 gui/*.input
 gui/*.param
 gui/*.data
