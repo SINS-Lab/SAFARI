@@ -10,6 +10,8 @@ from matplotlib.patches import Rectangle
 from matplotlib.patches import Circle
 from matplotlib.collections import PatchCollection
 import safari_input
+import subprocess
+import xyz_postprocess as xyz_p
 
 def read(f, first, data):
     if first:
@@ -134,6 +136,7 @@ class Detector:
         self.tmin = -180
         self.emin = 1e20
         self.emax = -1e20
+        self.safio = None
         
     def addDetection(self, line):
         self.detections = np.vstack((self.detections, line))
@@ -231,38 +234,29 @@ class Detector:
         #Draw the basis
         ax.add_collection(p)
         
-        #Draw Selected box
-        scale = 50
-        sh = (ax.get_ylim()[1]-ax.get_ylim()[0])/scale
-        sw = (ax.get_xlim()[1]-ax.get_xlim()[0])/scale
-        selected = Rectangle((0,0),sw,sh,facecolor=None,edgecolor='red')
-        selected.set_alpha(0.4)
-        ax.add_patch(selected)
-            
         #Draw the points
         ax.scatter(x, y)
         
         #Add a heightmap
         fig.colorbar(p, ax=ax)
+
+        #Add selected point label
+        text = ax.text(0.05, 0.95, 'None Selected',transform=ax.transAxes)
         
         ax.set_title("Detections: "+str(len(x)))
         ax.set_xlabel('X Target (Angstroms)')
         ax.set_ylabel('Y Target (Angstroms)')
-        
-        def onResize(event):
-            sh = (ax.get_ylim()[1]-ax.get_ylim()[0])/scale
-            sw = (ax.get_xlim()[1]-ax.get_xlim()[0])/scale
-            selected.set_height(sh)
-            selected.set_width(sw)
-            fig.canvas.draw()
+
+        self.p, = ax.plot(0,0,'r+')
 
         def onclick(event):
-            print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %\
-                 ('double' if event.dblclick else 'single', event.button,\
-                   event.x, event.y, event.xdata, event.ydata))
+            if event.xdata is None:
+                return
+
             close = [1e20, 1e20]
             distsq = close[0]**2 + close[1]**2
             index = -1
+
             for i in range(len(x)):
                 dxsq = (x[i]-event.xdata)**2
                 dysq = (y[i]-event.ydata)**2
@@ -271,18 +265,32 @@ class Detector:
                     close[0] = x[i]
                     close[1] = y[i]
                     index = i
-            print(close)
-            print(self.detections[3][index])
-            sh = (ax.get_ylim()[1]-ax.get_ylim()[0])/scale
-            sw = (ax.get_xlim()[1]-ax.get_xlim()[0])/scale
-            selected.set_height(sh)
-            selected.set_width(sw)
-            selected.set_xy((close[0] - sw/2, close[1] - sh/2))
+
+            if event.dblclick:
+                #Setup a single run safari for this.
+                self.safio.fileIn = self.safio.fileIn.replace('_mod.input', '_ss.input')
+                self.safio.setGridScat(True)
+                self.safio.NUMCHA = 1
+                self.safio.XSTART = close[0]
+                self.safio.YSTART = close[1]
+                self.safio.genInputFile(fileIn=self.safio.fileIn)
+                sub = subprocess.run('Safari.exe', shell=True)
+                close[0] = round(close[0],2)
+                close[1] = round(close[1],2)
+                xyz_p.process_file(self.safio.fileIn.replace('.input', '.xyz'),\
+                                       str(close[0])+','+str(close[1])+'.xyz')
+                print(sub)
+
+            close[0] = round(close[0],5)
+            close[1] = round(close[1],5)
+            text.set_text(str(close))
+            self.p.set_xdata([close[0]])
+            self.p.set_ydata([close[1]])
             fig.canvas.draw()
-                
-        
+
+
+            
         fig.canvas.mpl_connect('button_press_event', onclick)
-        fig.canvas.mpl_connect('resize_event', onResize)
         
         fig.show()
         
@@ -730,6 +738,7 @@ class Spectrum:
                                 thmax=float(thmax.displayText()),\
                                 lmin=float(lmin.displayText()),\
                                 lmax=float(lmax.displayText()))
+                self.detector.safio = self.safio
                 self.detector.impactParam(self.safio.BASIS,
                                          self.safio.AX, 
                                          self.safio.AY)

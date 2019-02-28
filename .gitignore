@@ -8,10 +8,12 @@ gui/build/*
 gui/dist/*
 gui/*.spec
 gui/*.txt
+gui/*.exe
 misc/*.input
 gui/*.input
 gui/*.param
 gui/*.data
+gui/*.undata
 *.xyz
 */__pycache__/*
 *.vs*

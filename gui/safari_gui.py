@@ -754,16 +754,32 @@ def makeInputBox(safari, name, index, subindex, _layout=None):
             text.editingFinished.connect(edit)
             
     if index==27:
-            button = QRadioButton()
-            button.setChecked(safari.isMonteCarlo())
-            def push():
-                safari.setMonteCarlo(button.isChecked())
-                safari.save()
-                safari.load()
-                initBoxes(safari, _layout)
-            button.clicked.connect(push)
-            hastext = False
-            layout.addWidget(button)
+        layout.removeWidget(label)
+        buttonMC = QRadioButton('Montecarlo')
+        buttonMC.setChecked(safari.isMonteCarlo())
+        buttonGC = QRadioButton('GridScat')
+        buttonGC.setChecked(safari.isGridScat())
+        def pushMC():
+            if safari.isGridScat():
+                safari.setGridScat(False)
+                buttonGC.setChecked(False)
+            safari.setMonteCarlo(buttonMC.isChecked())
+            safari.save()
+            safari.load()
+            initBoxes(safari, _layout)
+        def pushGC():
+            if safari.isMonteCarlo():
+                safari.setMonteCarlo(False)
+                buttonMC.setChecked(False)
+            safari.setGridScat(buttonGC.isChecked())
+            safari.save()
+            safari.load()
+            initBoxes(safari, _layout)
+        buttonMC.clicked.connect(pushMC)
+        layout.addWidget(buttonMC)
+        buttonGC.clicked.connect(pushGC)
+        layout.addWidget(buttonGC)
+        hastext = False
         
         
     # Most things use text box

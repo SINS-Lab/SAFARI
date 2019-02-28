@@ -136,7 +136,7 @@ class SafariInput:
         self.load()
         # Instead here we should check for a default file, and use that
         # if we do not have the requested input file.
-        self.fileIn = fileIn.replace('.input', '') + '_mod.input'
+        self.fileIn = fileIn.replace('.input', '_mod.input')
         # This copies stuff from the original input to the modified one.
         self.save()
         return
@@ -150,7 +150,6 @@ class SafariInput:
         saf_file.write(fileIn.replace('.input', ''))
         saf_file.close()
         
-
     def load(self):
         if not os.path.exists(self.fileIn):
             return
@@ -368,7 +367,7 @@ class SafariInput:
 
     def isMonteCarlo(self):
         return self.MINDIV == self.MAXDIV and self.MAXDIV == 1\
-           and self.NWRITX == self.NWRITY and self.NWRITY == 666
+           and self.NWRITX == 666 and self.NWRITY == 666
 
     def setMonteCarlo(self, montecarlo):
         if montecarlo:
@@ -376,6 +375,22 @@ class SafariInput:
             self.MINDIV = 1
             self.NWRITX = 666
             self.NWRITY = 666
+        else:
+            self.MAXDIV = 10
+            self.MINDIV = 2
+            self.NWRITX = 10
+            self.NWRITY = 10
+
+    def isGridScat(self):
+        return self.MINDIV == self.MAXDIV and self.MAXDIV == 1\
+           and self.NWRITX == 666 and self.NWRITY == 777
+
+    def setGridScat(self, grid):
+        if grid:
+            self.MAXDIV = 1
+            self.MINDIV = 1
+            self.NWRITX = 666
+            self.NWRITY = 777
         else:
             self.MAXDIV = 10
             self.MINDIV = 2

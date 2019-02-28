@@ -59,11 +59,11 @@
       iy=int((fay*ay-ystart) / ystep)
       n = ix * iy
       numcha = n
+      seed=0
 *     loop over x
       do 808 i=1,ix
 *         loop over y
           do 707 j=1,iy
-              seed=randsf(seed)
               xtraj(j) = xstart+xstep*(i-1)
               ytraj(j) = ystart+ystep*(j-1)
 *             Back up from impact point to start
