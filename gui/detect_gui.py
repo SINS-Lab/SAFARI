@@ -6,7 +6,6 @@ import os
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
 from matplotlib.patches import Circle
 from matplotlib.collections import PatchCollection
 import safari_input
@@ -277,19 +276,19 @@ class Detector:
                 sub = subprocess.run('Safari.exe', shell=True)
                 close[0] = round(close[0],2)
                 close[1] = round(close[1],2)
-                xyz_p.process_file(self.safio.fileIn.replace('.input', '.xyz'),\
-                                       str(close[0])+','+str(close[1])+'.xyz')
+                name = self.safio.fileIn.replace('.input', '')
+                xyz_p.process_file(name +'.xyz',\
+                                    name+str(close[0])+','+str(close[1])+'.xyz')
                 print(sub)
 
             close[0] = round(close[0],5)
             close[1] = round(close[1],5)
-            text.set_text(str(close))
+            energy = round(self.detections[index][3],2)
+            text.set_text(str(close)+', '+str(energy)+'eV')
             self.p.set_xdata([close[0]])
             self.p.set_ydata([close[1]])
             fig.canvas.draw()
 
-
-            
         fig.canvas.mpl_connect('button_press_event', onclick)
         
         fig.show()
