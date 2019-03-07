@@ -200,6 +200,7 @@ class Detector:
     def impactParam(self, basis = None, dx=0, dy=0):
         x = self.detections[...,0]
         y = self.detections[...,1]
+        c = self.detections[...,3]
         
         fig, ax = plt.subplots()
         patches = []
@@ -237,7 +238,8 @@ class Detector:
         ax.add_collection(p)
         
         #Draw the points
-        ax.scatter(x, y)
+        scat = ax.scatter(x, y, c=c)
+        fig.colorbar(scat, ax=ax)
         
         #Add a heightmap
         fig.colorbar(p, ax=ax)
