@@ -136,6 +136,9 @@ class Detector:
         self.emin = 1e20
         self.emax = -1e20
         self.safio = None
+
+    def clear(self):
+        self.detections = np.zeros((0,8))
         
     def addDetection(self, line):
         self.detections = np.vstack((self.detections, line))
@@ -375,7 +378,7 @@ class Spectrum:
             self.detector.emin = emin
         if emax!=-1e6:
             self.detector.emax = emax
-
+        self.detector.clear()
         for i in range(4,len(data)):
             traj = data[i]
             e = traj[3]
@@ -483,12 +486,12 @@ class Spectrum:
         if self.box_emin is None:
             self.box_emin = QLineEdit(str(self.data[0][0]))
             self.box_emax = QLineEdit(str(self.data[0][1]))
-            self.box_phimin = QLineEdit('45')
-            self.box_phimax = QLineEdit('45')
-            self.box_thetamin = QLineEdit('55')
-            self.box_thetamax = QLineEdit('55')
+            self.box_phimin = QLineEdit(str(self.safio.DTECTPAR[1]))
+            self.box_phimax = QLineEdit(str(self.safio.DTECTPAR[1]))
+            self.box_thetamin = QLineEdit(str(self.safio.DTECTPAR[0]))
+            self.box_thetamax = QLineEdit(str(self.safio.DTECTPAR[0]))
             self.box_eres = QLineEdit(str(self.data[0][2]))
-            self.box_ares = QLineEdit('3')
+            self.box_ares = QLineEdit(str(self.safio.DTECTPAR[2]))
         
         if dtype == 'Spot':
             layout.addWidget(QLabel('phi'))
@@ -598,21 +601,21 @@ class Spectrum:
 
         sublayout = QHBoxLayout()
         label = QLabel('thmax')
-        thmax = QLineEdit('100')
+        thmax = QLineEdit('90')
         sublayout.addWidget(label)
         sublayout.addWidget(thmax)
         anglelayout.addLayout(sublayout)
         
         sublayout = QHBoxLayout()
         label = QLabel('phimin')
-        phimin = QLineEdit('40')
+        phimin = QLineEdit(str(self.safio.PHI0 - 5))
         sublayout.addWidget(label)
         sublayout.addWidget(phimin)
         anglelayout.addLayout(sublayout)
 
         sublayout = QHBoxLayout()
         label = QLabel('phimax')
-        phimax = QLineEdit('50')
+        phimax = QLineEdit(str(self.safio.PHI0 + 5))
         sublayout.addWidget(label)
         sublayout.addWidget(phimax)
         anglelayout.addLayout(sublayout)
