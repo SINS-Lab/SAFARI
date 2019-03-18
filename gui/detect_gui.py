@@ -86,6 +86,9 @@ def load(file):
     
     if file.endswith('.txt') or file.endswith('.data'):
         return loadFromText(file)
+        
+    if not (file.endswith('.npy') or file.endswith('.undata')):
+        return loadFromText(file+'.data')
     
     data = []
     cache = file.replace('.undata','')
@@ -159,6 +162,7 @@ class Detector:
         intensity = integrate(numpoints, winv, tArr, aArr, angles)
 
         out = open(self.outputprefix\
+                  + 'Theta-'\
                   + str(self.tmin) + '-'\
                   + str(self.tmax)+'_'\
                   + str(res)+'.txt', 'w')
@@ -168,7 +172,7 @@ class Detector:
         fig, ax = plt.subplots()
         ax.plot(angles, intensity)
         ax.set_title("Intensity vs Theta, Detections: "+str(len(aArr)))
-        ax.set_xlabel('Angle')
+        ax.set_xlabel('Angle (Degrees)')
         ax.set_ylabel('Intensity')
         fig.show()
 
@@ -184,6 +188,7 @@ class Detector:
         intensity = integrate(numpoints, winv, eArr, aArr, energy)
 
         out = open(self.outputprefix\
+                  + 'Energy-'\
                   + str(self.emin) + '-'\
                   + str(self.emax)+'_'\
                   + str(res)+'.txt', 'w')
@@ -193,7 +198,7 @@ class Detector:
         fig, ax = plt.subplots()
         ax.plot(energy, intensity)
         ax.set_title("I_E, Detections: "+str(len(aArr)))
-        ax.set_xlabel('Energy')
+        ax.set_xlabel('Energy (eV)')
         ax.set_ylabel('Intensity')
         fig.show()
         
@@ -344,6 +349,7 @@ class Spectrum:
         self.detector = None
         self.box_emin = None
         self.safio = None
+        self.name = None
         self.rawData = []
         self.stuck = []
         self.buried = []
@@ -375,7 +381,7 @@ class Spectrum:
                 self.detector = SpotDetector(self.detectorParams[0],\
                                              self.detectorParams[1],\
                                              self.detectorParams[2])
-                
+        self.detector.outputprefix = self.name+'_spectrum_'
         if emin!=-1e6:
             self.detector.emin = emin
         if emax!=-1e6:
@@ -762,6 +768,17 @@ class Spectrum:
         window.show()
         return
 
+        
+def fileSelection():
+    dropdown = QComboBox()
+    directory = '.'
+    for filename in os.listdir(directory):
+#  Load in the inputs, but not _mod or _ss as those are temporary ones.
+        if filename.endswith('.input') and not filename==('safari.input')\
+           and not (filename.endswith('_mod.input') or filename.endswith('_ss.input')):
+            dropdown.addItem(filename.replace('.input', ''))
+    return dropdown
+        
 def run(spectrum):
     app = QApplication([])
     window = QWidget()
@@ -769,7 +786,7 @@ def run(spectrum):
     
     sublayout = QHBoxLayout()
     label = QLabel('input file name')
-    filebox = QLineEdit('sample.data')
+    filebox = fileSelection()
     
     sublayout.addWidget(label)
     sublayout.addWidget(filebox)
@@ -782,20 +799,24 @@ def run(spectrum):
     #Make a button for running 
     run = QPushButton('Spectrum')
     def push():
-        data = load(filebox.displayText())
+        data = load(filebox.currentText())
         try:
             spectrum = Spectrum()
-            file = filebox.displayText()
+            file = filebox.currentText()
             if file.endswith('.data'):
                 file = file.replace('.data', '.input')
-            if file.endswith('.txt'):
+            elif file.endswith('.txt'):
                 file = file.replace('.txt', '.input')
-            if file.endswith('.undata'):
+            elif file.endswith('.undata'):
                 file = file.replace('.undata', '.input')
-            if file.endswith('.npy'):
+            elif file.endswith('.npy'):
                 file = file.replace('.npy', '.input')
+            else:
+                file = file + '.input'
             spectrum.safio = safari_input.SafariInput(file)
+            spectrum.name = filebox.currentText()
             spectrum.run(data)
+            spectrum.popup.setWindowTitle(spectrum.name)
         except Exception as e:
             print(e)
             pass
@@ -813,6 +834,7 @@ def run(spectrum):
     close.clicked.connect(done)
     layout.addWidget(close)
     window.setLayout(layout)
+    window.setWindowTitle('Detect')
     window.show()
     app.exec_()
 
