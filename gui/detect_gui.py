@@ -166,6 +166,7 @@ class Detector:
                   + str(self.tmin) + '-'\
                   + str(self.tmax)+'_'\
                   + str(res)+'.txt', 'w')
+        out.write(str(len(aArr))+'\n')
         for i in range(numpoints):
             out.write(str(angles[i])+'\t'+str(intensity[i])+'\n')
         out.close()
@@ -192,6 +193,7 @@ class Detector:
                   + str(self.emin) + '-'\
                   + str(self.emax)+'_'\
                   + str(res)+'.txt', 'w')
+        out.write(str(len(aArr))+'\n')
         for i in range(numpoints):
             out.write(str(energy[i])+'\t'+str(intensity[i])+'\n')
         out.close()
