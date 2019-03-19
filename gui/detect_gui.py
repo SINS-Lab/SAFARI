@@ -567,21 +567,21 @@ class Spectrum:
 
         # Fields to enter values for stuff
         label = QLabel('emin')
-        emin = QLineEdit(str(data[0][0]))
+        emin = QLineEdit(str(self.safio.EMIN))
         sublayout.addWidget(label)
         sublayout.addWidget(emin)
         ellayout.addLayout(sublayout)
 
         sublayout = QHBoxLayout()
         label = QLabel('emax')
-        emax = QLineEdit(str(data[0][1]))
+        emax = QLineEdit(str(self.safio.EMAX))
         sublayout.addWidget(label)
         sublayout.addWidget(emax)
         ellayout.addLayout(sublayout)
 
         sublayout = QHBoxLayout()
         label = QLabel('eres')
-        eres = QLineEdit(str(data[0][2]))
+        eres = QLineEdit(str(self.safio.ESIZE))
         sublayout.addWidget(label)
         sublayout.addWidget(eres)
         ellayout.addLayout(sublayout)
@@ -632,10 +632,7 @@ class Spectrum:
 
         sublayout = QHBoxLayout()
         label = QLabel('ares')
-        var = 5
-        if data[1][0] == 1:
-            var = data[2][2];
-        ares = QLineEdit(str(var))
+        ares = QLineEdit(str(self.safio.ASIZE))
         sublayout.addWidget(label)
         sublayout.addWidget(ares)
         anglelayout.addLayout(sublayout)
