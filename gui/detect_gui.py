@@ -309,6 +309,7 @@ class StripeDetector(Detector):
     
     def __init__(self, theta1, theta2, phi, width):
         super().__init__()
+        width = abs(width)
         self.tmin = min(theta1, theta2)
         self.tmax = max(theta1, theta2)
         self.phiMax = phi + width/2
@@ -381,7 +382,7 @@ class Spectrum:
             self.detectorParams = self.data[2]
             if self.detectorType == 1:
                 self.detector = SpotDetector(self.detectorParams[0],\
-                                             self.detectorParams[1],\
+                                             self.safio.PHI0,\
                                              self.detectorParams[2])
         self.detector.outputprefix = self.name+'_spectrum_'
         if emin!=-1e6:
@@ -496,8 +497,8 @@ class Spectrum:
         if self.box_emin is None:
             self.box_emin = QLineEdit(str(self.data[0][0]))
             self.box_emax = QLineEdit(str(self.data[0][1]))
-            self.box_phimin = QLineEdit(str(self.safio.DTECTPAR[1]))
-            self.box_phimax = QLineEdit(str(self.safio.DTECTPAR[1]))
+            self.box_phimin = QLineEdit(str(self.safio.PHI0))
+            self.box_phimax = QLineEdit(str(self.safio.PHI0))
             self.box_thetamin = QLineEdit(str(self.safio.DTECTPAR[0]))
             self.box_thetamax = QLineEdit(str(self.safio.DTECTPAR[0]))
             self.box_eres = QLineEdit(str(self.data[0][2]))
@@ -665,10 +666,11 @@ class Spectrum:
             try:
                 print('init detector')
                 detector = self.detector
+                dphi =  float(phimax.displayText()) - float(phimin.displayText())
                 self.detector = StripeDetector(float(thmin.displayText()),\
                                                float(thmax.displayText()),\
                                                float(phimin.displayText()),\
-                                               float(phimax.displayText()))
+                                               dphi)
                 print('clean data')
                 self.clean(data,emin=float(emin.displayText()),\
                                 emax=float(emax.displayText()),\
@@ -714,10 +716,11 @@ class Spectrum:
             try:
                 print('init detector')
                 detector = self.detector
+                dphi =  float(phimax.displayText()) - float(phimin.displayText())
                 self.detector = StripeDetector(float(thmin.displayText()),\
                                                float(thmax.displayText()),\
                                                float(phimin.displayText()),\
-                                               float(phimax.displayText()))
+                                               dphi)
                 self.clean(data,emin=float(emin.displayText()),\
                                 emax=float(emax.displayText()),\
                                 phimin=float(phimin.displayText()),\
