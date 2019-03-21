@@ -770,15 +770,23 @@ class Spectrum:
         window.show()
         return
 
+def addDropdownItems(dropdown, directory, subdirectories):
+    for filename in os.listdir(directory):
+        # Load in the inputs, but not _mod or _ss as those are temporary ones.
+        if filename.endswith('.input') and not filename==('safari.input')\
+           and not (filename.endswith('_mod.input') or filename.endswith('_ss.input')):
+            dropdown.addItem(os.path.join(directory, filename).replace('.input', ''))
+        # Also add any input files in the next level down from here.
+        if subdirectories and os.path.isdir(filename):
+            newDir = os.path.join(directory, filename)
+            addDropdownItems(dropdown, newDir, False)
+    
+
         
 def fileSelection():
     dropdown = QComboBox()
     directory = '.'
-    for filename in os.listdir(directory):
-#  Load in the inputs, but not _mod or _ss as those are temporary ones.
-        if filename.endswith('.input') and not filename==('safari.input')\
-           and not (filename.endswith('_mod.input') or filename.endswith('_ss.input')):
-            dropdown.addItem(filename.replace('.input', ''))
+    addDropdownItems(dropdown, directory, True)
     return dropdown
         
 def run(spectrum):
@@ -805,6 +813,7 @@ def run(spectrum):
         try:
             spectrum = Spectrum()
             file = filebox.currentText()
+            filename = os.path.basename(file)
             if file.endswith('.data'):
                 file = file.replace('.data', '.input')
             elif file.endswith('.txt'):
@@ -818,7 +827,7 @@ def run(spectrum):
             spectrum.safio = safari_input.SafariInput(file)
             spectrum.name = filebox.currentText()
             spectrum.run(data)
-            spectrum.popup.setWindowTitle(spectrum.name)
+            spectrum.popup.setWindowTitle(filename)
         except Exception as e:
             print(e)
             pass
