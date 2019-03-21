@@ -98,6 +98,14 @@ def load(file):
         data = loadFromUndata(file, cache)
     return data
 
+def kinematicFactor(theta_final, theta_inc, massProject, massTarget):
+    mu = massProject/massTarget
+    theta_tsa = 180 - theta_inc - theta_final
+    cos_tsa = math.cos(math.radians(theta_tsa))
+    sin_tsa = math.sin(math.radians(theta_tsa))
+    k = ((mu/(1+mu))**2) * (cos_tsa + (1 / (mu**2) - sin_tsa**2)**0.5)**2
+    return k
+
 def unit(theta, phi):
     th = theta * math.pi / 180
     ph = phi * math.pi / 180
@@ -139,11 +147,16 @@ class Detector:
         self.emin = 1e20
         self.emax = -1e20
         self.safio = None
+        self.E_over_E0 = True
 
     def clear(self):
         self.detections = np.zeros((0,8))
         
     def addDetection(self, line):
+        if(self.E_over_E0):
+            line = line.copy()
+            line[3] = line[3]/self.safio.E0
+        
         self.detections = np.vstack((self.detections, line))
         e = line[3]
         if e < self.emin:
@@ -179,6 +192,10 @@ class Detector:
 
 
     def spectrumE(self, res, numpoints=1000):
+        
+        if self.E_over_E0:
+            res = res/self.safio.E0
+        
         step = (self.emax - self.emin) / numpoints
         winv = 1/res
         energy = np.array([(self.emin + x*step) for x in range(numpoints)])
@@ -187,20 +204,42 @@ class Detector:
         aArr = self.detections[...,7]
 
         intensity = integrate(numpoints, winv, eArr, aArr, energy)
-
-        out = open(self.outputprefix\
+        k = kinematicFactor(self.tmax, self.safio.THETA0,\
+                            self.safio.MASS,self.safio.ATOMS[0][0])
+        file = self.outputprefix\
                   + 'Energy-'\
                   + str(self.emin) + '-'\
                   + str(self.emax)+'_'\
-                  + str(res)+'.txt', 'w')
-        out.write(str(len(aArr))+'\n')
+                  + str(res)+'.txt'
+      
+        if self.E_over_E0:
+            file = self.outputprefix\
+                  + 'Energy_E_over_E0-'\
+                  + str(self.tmax) + '-'\
+                  + str(res)+'.txt'
+
+        out = open(file, 'w')
+        out.write('energy\tintensity\tcounts\tk-factor\n')
         for i in range(numpoints):
-            out.write(str(energy[i])+'\t'+str(intensity[i])+'\n')
+            if i == 0:
+                out.write(str(energy[i])+'\t'+str(intensity[i])+'\t'+\
+                          str(len(aArr))+'\t'+str(k)+'\n')
+            else:
+                out.write(str(energy[i])+'\t'+str(intensity[i])+'\n')
         out.close()
         fig, ax = plt.subplots()
         ax.plot(energy, intensity)
+        ax.set_ylim(0,1)
+        
+        if self.E_over_E0:
+            kplot, = ax.plot([k,k],[-1,2], label='k-Factor')
+            plt.legend()
+        
         ax.set_title("I_E, Detections: "+str(len(aArr)))
-        ax.set_xlabel('Energy (eV)')
+        if self.E_over_E0:
+            ax.set_xlabel('Energy (E/E0)')
+        else:
+            ax.set_xlabel('Energy (eV)')
         ax.set_ylabel('Intensity')
         fig.show()
         
@@ -324,6 +363,8 @@ class SpotDetector(Detector):
     def __init__(self, theta, phi, size):
         super().__init__()
         self.theta = theta
+        self.tmin = theta
+        self.tmax = theta
         self.phi = phi
         self.size = size
         self.dir = unit(theta, phi)
@@ -353,6 +394,7 @@ class Spectrum:
         self.box_emin = None
         self.safio = None
         self.name = None
+        self.E_over_E0 = True
         self.rawData = []
         self.stuck = []
         self.buried = []
@@ -384,11 +426,14 @@ class Spectrum:
                 self.detector = SpotDetector(self.detectorParams[0],\
                                              self.safio.PHI0,\
                                              self.detectorParams[2])
+        self.detector.safio = self.safio
         self.detector.outputprefix = self.name+'_spectrum_'
-        if emin!=-1e6:
-            self.detector.emin = emin
-        if emax!=-1e6:
-            self.detector.emax = emax
+        self.detector.E_over_E0 = self.E_over_E0
+        if not self.E_over_E0:
+            if emin!=-1e6:
+                self.detector.emin = emin
+            if emax!=-1e6:
+                self.detector.emax = emax
         self.detector.clear()
         for i in range(4,len(data)):
             traj = data[i]
