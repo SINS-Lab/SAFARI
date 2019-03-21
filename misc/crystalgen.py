@@ -103,11 +103,13 @@ def gen(_size, _dir, _axis, _basis, _n, zTop, zBottom):
     im = np.array(axis)
     ix = np.array(dir)
     R = helpers.rotate(ix, im)
+    R_inv = np.linalg.inv(R)
     
-    ex = np.asarray(np.matmul(R, np.array([1,0,0])))[0]*lattice[0]
-    ey = np.asarray(np.matmul(R, np.array([0,1,0])))[0]*lattice[1]
-    ez = np.asarray(np.matmul(R, np.array([0,0,1])))[0]*lattice[2]
+    ex = np.asarray(np.matmul(R_inv, np.array([1,0,0])))[0]*lattice[0]
+    ey = np.asarray(np.matmul(R_inv, np.array([0,1,0])))[0]*lattice[1]
+    ez = np.asarray(np.matmul(R_inv, np.array([0,0,1])))[0]*lattice[2]
     
+    print(str(ex)+' '+str(ey)+' '+str(ez))
     
     maxZ = -1e20
     maxZI = 0
@@ -164,7 +166,7 @@ def gen(_size, _dir, _axis, _basis, _n, zTop, zBottom):
 if __name__ == '__main__':
     size = 4.09
     dir = [0,0,1]
-    axis = [0,0,1]
+    axis = [7,8,8]
     atom = basisgen.Atom(107.87,47)
     crystal = gen(size, dir, axis, basisgen.fccBasis(atom), 4, 0.1, -2.5*size)
     n = 3
