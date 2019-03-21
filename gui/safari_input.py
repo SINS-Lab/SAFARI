@@ -176,6 +176,12 @@ class SafariInput:
                 self.PHI0 = args[2]
                 self.MASS = args[3]
                 self.SYMION = args[4]
+                # Ensure phi is in correct range
+                while self.PHI0 > 180:
+                    self.PHI0 -= 360
+                while self.PHI0 < -180:
+                    self.PHI0 += 360
+                
             #EMIN,EMAX,ESIZE,ASIZE
             if n == 2:
                 self.EMIN = args[0]
@@ -404,6 +410,12 @@ class SafariInput:
             output = open(self.fileIn, 'w')
         else:
             output = open(file, 'w')
+            
+        # Ensure phi is between -180 and 180
+        while self.PHI0 > 180:
+            self.PHI0 -= 360
+        while self.PHI0 < -180:
+            self.PHI0 += 360
 
         file = serialize(self.E0, self.THETA0, self.PHI0, self.MASS, self.SYMION) + '\n' \
             +  serialize(self.EMIN, self.EMAX, self.ESIZE, self.ASIZE)  + '\n' \
