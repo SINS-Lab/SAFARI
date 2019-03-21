@@ -109,8 +109,6 @@ def gen(_size, _dir, _axis, _basis, _n, zTop, zBottom):
     ey = np.asarray(np.matmul(R_inv, np.array([0,1,0])))[0]*lattice[1]
     ez = np.asarray(np.matmul(R_inv, np.array([0,0,1])))[0]*lattice[2]
     
-    print(str(ex)+' '+str(ey)+' '+str(ez))
-    
     maxZ = -1e20
     maxZI = 0
     
@@ -128,10 +126,13 @@ def gen(_size, _dir, _axis, _basis, _n, zTop, zBottom):
     n = 0
     m = 0
     diff = [0,0,0]
+    
+    ns = -_n
+    ne = _n
 
-    for x in range(-_n, _n):
-        for y in range(-_n, _n):
-            for z in range(-_n, _n):
+    for x in range(ns, ne):
+        for y in range(ns, ne):
+            for z in range(ns, ne):
                 diff[0] = (ex[0] * x + ex[1] * y + ex[2] * z)
                 diff[1] = (ey[0] * x + ey[1] * y + ey[2] * z)
                 diff[2] = (ez[0] * x + ez[1] * y + ez[2] * z)
@@ -168,6 +169,6 @@ if __name__ == '__main__':
     dir = [0,0,1]
     axis = [7,8,8]
     atom = basisgen.Atom(107.87,47)
-    crystal = gen(size, dir, axis, basisgen.fccBasis(atom), 4, 0.1, -2.5*size)
-    n = 3
+    crystal = gen(size, dir, axis, basisgen.fccBasis(atom), 6, 0.1, -4.5*size)
+    n = 4
     clearOutOfBounds(crystal, -size * n, size * n, -size * n, size * n, -size*1.6, 0)

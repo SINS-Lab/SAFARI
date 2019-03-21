@@ -2,10 +2,6 @@ import os
 import subprocess
 import time
 
-#from PyQt5.QtWidgets import QWidget, QApplication
-#from PyQt5.QtWidgets import QGridLayout, QHBoxLayout, QVBoxLayout, QComboBox
-#from PyQt5.QtWidgets import QLineEdit, QLabel, QPushButton
-
 def run(threads, directory='.'):
     processes = []
     number = 1
@@ -25,26 +21,9 @@ def run(threads, directory='.'):
                     p.join()
                 processes = []
                 number = 1
-    
-
-
-#def run():
-#    app = QApplication([])
-#    window = QWidget()
-#    layout = QGridLayout()
-#    
-#    # Button to close the window
-#    close = QPushButton('Close')
-#    def done():
-#        window.close()
-#    close.clicked.connect(done)
-#    layout.addWidget(close)
-#    window.setLayout(layout)
-#    window.setWindowTitle('Detect')
-#    window.show()
-#    app.exec_()
-    
-
 if __name__ == '__main__':
 #    run()
     txtnum = input("Number of Threads? ")
+    rundir = input("Run Directory? ")
+    threads = int(txtnum)
+    run(threads, directory=rundir)

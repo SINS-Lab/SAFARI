@@ -134,11 +134,12 @@ class PointViewer:
 
     def load(self):
         self.outputfile = open('T.output', 'w')
-        size = 4.08
+        size = 4.09
         dir = [0,0,1]
-        axis = [0,0,1]
-        atom = basisgen.Atom(196.966570,79)
-      #  crystalgen.gen(size, dir, axis, basisgen.fccBasis(atom), 2, 0.1, -2.5*size)
+        axis = [7,8,8]
+        atom = basisgen.Atom(107.87,47)
+        crystalgen.gen(size, dir, axis, basisgen.fccBasis(atom), 6, 0.1, -2.5*size)
+        
         self.particles.coupling = False
         self.particles.steps = False
         self.particles.load('crystal.input')
