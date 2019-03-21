@@ -15,6 +15,7 @@ gui/*.input
 gui/*.param
 gui/*.data
 gui/*.undata
+gui/tests/*
 *.xyz
 */__pycache__/*
 *.vs*
