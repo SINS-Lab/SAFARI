@@ -277,6 +277,8 @@ C
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE "params.txt"
       INTEGER TYPBAS(NBASISMAX),NBASIS,TYPEAT(NPARTMAX)
+      integer zion
+      integer zsite
       character*2 ATSYM(NTYPEMAX)
       character*2 SYMION
       INTEGER NTYPES
@@ -287,12 +289,29 @@ C
 C
       COMMON/XTAL/AX,AY,XBASIS(3,NBASISMAX),TYPBAS,NBASIS
       COMMON/TYPES/NTYPES
+      Common/ZBLPAR/ZBLPAR(NTYPEMAX+1)
       common/symbols/SYMION,ATSYM
       COMMON/MASS/MASS,MION,TYPEAT
       COMMON/MINV/MASS1,MION1
       COMMON/K/SPRING(NTYPEMAX,3)
       COMMON/CHARGE/CHARGE
       common/corr/atomk,rneigh,corr
+
+      zion = 1
+      zsite = 1
+c     Stuffs the ion Z in the first entry of the ZBL array
+      if(SYMION.eq.'Li') then
+         zion = 3
+      else if(SYMION.eq.'Na') then
+         zion = 11
+      else if(SYMION.eq.'K') then
+         zion = 19
+      else if(SYMION.eq.'Rb') then
+         zion = 37
+      else if(SYMION.eq.'Cs') then
+         zion = 55
+      endif
+      ZBLPAR(1) = zion
 c
       write(10,*) '---------Crystal data-------------'
       READ(9,*) AX,AY
@@ -313,6 +332,21 @@ c
  1003 format(1x,'number of atom types = ',i4)
       DO 10 I=1,NTYPES
          READ(9,*) MASS(I),CHARGE(I), ATSYM(I)
+
+c     Initialize the ZBL potential for this site.
+         a0 = 0.5292
+         if(ATSYM(I).eq.'Cu') then
+            zsite = 29
+         else if(ATSYM(I).eq.'Ag') then
+            zsite = 47
+         else if(ATSYM(I).eq.'Au') then
+            zsite = 79
+         else if(ATSYM(I).eq.'Pt') then
+            zsite = 78
+         endif
+         ZBLPAR(I + 1) = 0.8853 * a0 / ((zion**0.23) + (zsite ** 0.23))
+         write(*,*) ZBLPAR(I + 1), zion, SYMION, zsite, ATSYM(I)
+
          write(10,1004) mass(i),charge(i)
  1004    format(1x,'mass = ',d12.6,'amu',' charge = ',i4)
          MASS1(I)=1./MASS(I)

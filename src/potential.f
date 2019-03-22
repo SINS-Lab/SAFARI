@@ -7,8 +7,10 @@ C CAK 19jan95 - error in VR(R,NV) fixed
 C
       DOUBLE PRECISION FUNCTION DVDR(R,NV)
       IMPLICIT REAL*8 (A-H,O-Z)
-      integer charge(10)
+      INCLUDE "params.txt"
+      integer charge(NTYPEMAX)
       COMMON/POTPAR/POTPAR(30),PIMPAR(10),IPOT,IIMPOT
+      Common/ZBLPAR/ZBLPAR(NTYPEMAX+1)
       COMMON/CHARGE/CHARGE
       DATA ESQR/14.398D0/
 C  ZBL SCREENING FUNCTION.
@@ -33,8 +35,8 @@ C TWO-EXPONENTIAL POTENTIAL
       ELSE IF(IPOT.EQ.2) THEN
 C ZBL TYPE POTENTIAL
 C
-         zion=potpar(1)
-         SCREEN=POTPAR(NV+1)
+         zion=ZBLPAR(1)
+         SCREEN=ZBLPAR(NV+1)
 c
          Zatom=1.0D0*CHARGE(NV)
          IF(R.EQ.0.0D0) THEN
@@ -63,8 +65,10 @@ C EXPONENTIAL PLUS GAUSSIAN POTENTIAL
 C****************************************************
       DOUBLE PRECISION FUNCTION VR(R,NV)
       IMPLICIT REAL*8 (A-H,O-Z)
-      integer charge(10)
+      INCLUDE "params.txt"
+      integer charge(NTYPEMAX)
       COMMON/POTPAR/POTPAR(30),PIMPAR(10),IPOT,IIMPOT
+      Common/ZBLPAR/ZBLPAR(NTYPEMAX+1)
       COMMON/CHARGE/CHARGE
       DATA ESQR/14.398D0/
 C  ZBL SCREENING FUNCTION.
@@ -90,8 +94,8 @@ C TWO-EXPONENTIAL POTENTIAL
 C ZBL TYPE POTENTIAL
          INDEX=2*(NV-1)
 C
-         zion=potpar(1)
-         SCREEN=POTPAR(index+2)
+         zion=ZBLPAR(1)
+         SCREEN=ZBLPAR(NV+1)
 c
          Zatom=1.0D0*CHARGE(NV)
          IF(R.EQ.0.0D0) THEN

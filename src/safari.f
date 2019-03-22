@@ -124,6 +124,9 @@ C               INVERSES OF MASSES.
       character*2 ATSYM(NTYPEMAX)
 *     Atomic symbols for the basis atoms
 
+      REAL*8 ZBLPAR(NTYPEMAX+1)
+C     Parameters for ZBL Potentials, 1 for each atom type, +1 for the ion
+
 C
 C INTEGRATION OF TRAJECTORIES:
 C
@@ -289,6 +292,7 @@ COMMON!!
         COMMON/OTHER/Z1,MAXDIV,MINDIV,FAX,FAY,START,NPART
         COMMON/PBC/PBC,NWRITX,NWRITY
         COMMON/POTPAR/POTPAR(30),PIMPAR(10),IPOT,IIMPOT
+        Common/ZBLPAR/ZBLPAR
         COMMON/POTENT/POTENT
         COMMON/TOFINE/TOFINE
         COMMON/IMAGE/IMAGE
