@@ -138,7 +138,10 @@ class PointViewer:
         dir = [0,0,1]
         axis = [7,8,8]
         atom = basisgen.Atom(107.87,47)
-        crystalgen.gen(size, dir, axis, basisgen.fccBasis(atom), 6, 0.1, -2.5*size)
+        #crystalgen.gen(size, dir, axis, basisgen.fccBasis(atom), 6, 0.1, -2.5*size)
+        crystal = crystalgen.gen(size, dir, axis, basisgen.fccBasis(atom), 6, 0.1, -1.75*size)
+        n = 4
+        crystalgen.clearOutOfBounds(crystal, -size * n, size * n, -size * n, size * n, -size*1.75, 0)
         
         self.particles.coupling = False
         self.particles.steps = False
