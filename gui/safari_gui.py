@@ -370,7 +370,7 @@ def makeAtomsPopup(safari, layout, label, text, name, subindex):
         safari.popup = QWidget()
         window = safari.popup
         layout = QVBoxLayout()
-        table = QTableWidget(subindex,5)
+        table = QTableWidget(subindex,6)
         table.setHorizontalHeaderLabels(['Mass', 'Charge', 'Symbol',\
                                          'SX', 'SY', 'SZ'])
         # Populate the table
@@ -379,10 +379,10 @@ def makeAtomsPopup(safari, layout, label, text, name, subindex):
             spring = safari.SPRINGS[i]
             table.setItem(i,0,QTableWidgetItem(str(atom[0])))
             table.setItem(i,1,QTableWidgetItem(str(atom[1])))
-            table.setItem(i,1,QTableWidgetItem(str(atom[2])))
-            table.setItem(i,2,QTableWidgetItem(str(spring[0])))
-            table.setItem(i,3,QTableWidgetItem(str(spring[1])))
-            table.setItem(i,4,QTableWidgetItem(str(spring[2])))
+            table.setItem(i,2,QTableWidgetItem(str(atom[2])))
+            table.setItem(i,3,QTableWidgetItem(str(spring[0])))
+            table.setItem(i,4,QTableWidgetItem(str(spring[1])))
+            table.setItem(i,5,QTableWidgetItem(str(spring[2])))
             
         # Button to close the window
         close = QPushButton('Done')
@@ -398,9 +398,9 @@ def makeAtomsPopup(safari, layout, label, text, name, subindex):
                 if new != old:
                     print('Should update mass an charge from table')
                 atom[2] =  new
-                spring[0] = parseVar(table.item(i,2).text())
-                spring[1] = parseVar(table.item(i,3).text())
-                spring[2] = parseVar(table.item(i,4).text())
+                spring[0] = parseVar(table.item(i,3).text())
+                spring[1] = parseVar(table.item(i,4).text())
+                spring[2] = parseVar(table.item(i,5).text())
             safari.save()
             window.close()
         close.clicked.connect(done)
