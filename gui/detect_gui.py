@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QLineEdit, QLabel, QPushButton
 from scipy.io import FortranFile
 import os
 import math
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
@@ -858,6 +859,7 @@ def run(spectrum):
         try:
             spectrum = Spectrum()
             file = filebox.currentText()
+            spectrum.name = file
             filename = os.path.basename(file)
             if file.endswith('.data'):
                 file = file.replace('.data', '.input')
@@ -870,7 +872,6 @@ def run(spectrum):
             else:
                 file = file + '.input'
             spectrum.safio = safari_input.SafariInput(file)
-            spectrum.name = filebox.currentText()
             spectrum.run(data)
             spectrum.popup.setWindowTitle(filename)
         except Exception as e:
@@ -880,6 +881,41 @@ def run(spectrum):
     
     box = QVBoxLayout()
     box.addWidget(run)
+
+    #Make a button for running all of them
+
+    #Make a button for running 
+    run_all = QPushButton('Run All')
+    def push_2():
+        AllItems = [filebox.itemText(i) for i in range(filebox.count())]
+        for file in AllItems:
+            data = load(file)
+            try:
+                spectrum = Spectrum()
+                spectrum.name = file
+                filename = os.path.basename(file)
+                if file.endswith('.data'):
+                    file = file.replace('.data', '.input')
+                elif file.endswith('.txt'):
+                    file = file.replace('.txt', '.input')
+                elif file.endswith('.undata'):
+                    file = file.replace('.undata', '.input')
+                elif file.endswith('.npy'):
+                    file = file.replace('.npy', '.input')
+                else:
+                    file = file + '.input'
+                spectrum.safio = safari_input.SafariInput(file)
+                spectrum.run(data)
+                spectrum.popup.setWindowTitle(filename)
+            except Exception as e:
+                print(e)
+                pass
+            #Wait a second for it to start running
+            time.sleep(1)
+
+    run_all.clicked.connect(push_2)
+    
+    box.addWidget(run_all)
 
     layout.addLayout(box, x + 10, y)
     
