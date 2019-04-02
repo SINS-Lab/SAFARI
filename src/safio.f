@@ -283,13 +283,14 @@ C
       character*2 SYMION
       INTEGER NTYPES
       INTEGER CHARGE(NTYPEMAX)
+      integer ZPARTICLES(NTYPEMAX+1)
       REAL*8 MASS(NTYPEMAX),MION
       REAL*8 MASS1(NTYPEMAX),MION1
       logical corr
 C
       COMMON/XTAL/AX,AY,XBASIS(3,NBASISMAX),TYPBAS,NBASIS
       COMMON/TYPES/NTYPES
-      Common/ZBLPAR/ZBLPAR(NTYPEMAX+1)
+      Common/ZPARS/ZBLPAR(NTYPEMAX+1),ZPARTICLES
       common/symbols/SYMION,ATSYM
       COMMON/MASS/MASS,MION,TYPEAT
       COMMON/MINV/MASS1,MION1
@@ -311,6 +312,7 @@ c     Stuffs the ion Z in the first entry of the ZBL array
       else if(SYMION.eq.'Cs') then
          zion = 55
       endif
+      ZPARTICLES(1) = zion
       ZBLPAR(1) = zion
 c
       write(10,*) '---------Crystal data-------------'
@@ -344,8 +346,9 @@ c     Initialize the ZBL potential for this site.
          else if(ATSYM(I).eq.'Pt') then
             zsite = 78
          endif
+         ZPARTICLES(I + 1) = zsite
          ZBLPAR(I + 1) = 0.8853 * a0 / ((zion**0.23) + (zsite ** 0.23))
-         write(*,*) ZBLPAR(I + 1), zion, SYMION, zsite, ATSYM(I)
+         write(*,*) zion, SYMION, zsite, ATSYM(I)
 
          write(10,1004) mass(i),charge(i)
  1004    format(1x,'mass = ',d12.6,'amu',' charge = ',i4)

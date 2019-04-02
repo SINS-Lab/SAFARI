@@ -67,8 +67,9 @@ C****************************************************
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE "params.txt"
       integer charge(NTYPEMAX)
+      integer ZPARTICLES(NTYPEMAX+1)
       COMMON/POTPAR/POTPAR(30),PIMPAR(10),IPOT,IIMPOT
-      Common/ZBLPAR/ZBLPAR(NTYPEMAX+1)
+      Common/ZPARS/ZBLPAR(NTYPEMAX+1),ZPARTICLES(NTYPEMAX+1)
       COMMON/CHARGE/CHARGE
       DATA ESQR/14.398D0/
 C  ZBL SCREENING FUNCTION.

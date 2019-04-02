@@ -127,6 +127,9 @@ C               INVERSES OF MASSES.
       REAL*8 ZBLPAR(NTYPEMAX+1)
 C     Parameters for ZBL Potentials, 1 for each atom type, +1 for the ion
 
+      Integer ZPARTICLES(NTYPEMAX+1)
+C     Z for the species under study, 1 for each atom type, +1 for the ion
+
 C
 C INTEGRATION OF TRAJECTORIES:
 C
@@ -292,7 +295,7 @@ COMMON!!
         COMMON/OTHER/Z1,MAXDIV,MINDIV,FAX,FAY,START,NPART
         COMMON/PBC/PBC,NWRITX,NWRITY
         COMMON/POTPAR/POTPAR(30),PIMPAR(10),IPOT,IIMPOT
-        Common/ZBLPAR/ZBLPAR
+        Common/ZPARS/ZBLPAR,ZPARTICLES
         COMMON/POTENT/POTENT
         COMMON/TOFINE/TOFINE
         COMMON/IMAGE/IMAGE
