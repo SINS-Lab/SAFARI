@@ -6,12 +6,21 @@ import os
 import math
 import time
 import numpy as np
+#if you utilize the following two lines you will be able to run 
+#the figures in here. This requires changing the backend of the fig.show()
+#for more backend choices please see https://matplotlib.org/tutorials/introductory/usage.html#what-is-a-backend
+import matplotlib
+#Qt5Agg is the backend
+matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 from matplotlib.collections import PatchCollection
 import safari_input
 import subprocess
 import xyz_postprocess as xyz_p
+
+
+
 
 def read(f, first, data):
     if first:
@@ -181,6 +190,7 @@ class Detector:
                   + str(self.tmax)+'_'\
                   + str(res)+'.txt', 'w')
         out.write(str(len(aArr))+'\n')
+        #writes the angle 
         for i in range(numpoints):
             out.write(str(angles[i])+'\t'+str(intensity[i])+'\n')
         out.close()
@@ -190,8 +200,8 @@ class Detector:
         ax.set_xlabel('Angle (Degrees)')
         ax.set_ylabel('Intensity')
         fig.show()
-
-
+        
+        
     def spectrumE(self, res, numpoints=1000):
         
         if self.E_over_E0:
@@ -221,6 +231,7 @@ class Detector:
 
         out = open(file, 'w')
         out.write('energy\tintensity\tcounts\tk-factor\n')
+        #This writes out the energy into a text file
         for i in range(numpoints):
             if i == 0:
                 out.write(str(energy[i])+'\t'+str(intensity[i])+'\t'+\
