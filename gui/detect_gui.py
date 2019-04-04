@@ -200,7 +200,8 @@ class Detector:
         ax.set_xlabel('Angle (Degrees)')
         ax.set_ylabel('Intensity')
         fig.show()
-        
+        #The following saves the plot as a png file
+        #fig.savefig('thetaplot.png')
         
     def spectrumE(self, res, numpoints=1000):
         
@@ -254,6 +255,8 @@ class Detector:
             ax.set_xlabel('Energy (eV)')
         ax.set_ylabel('Intensity')
         fig.show()
+        #The following saves the plot as a png file
+        #fig.savefig('energyplot.png')
         
     def impactParam(self, basis = None, dx=0, dy=0):
         x = self.detections[...,0]
@@ -497,6 +500,8 @@ class Spectrum:
         ax.set_xlabel('Angle (Degrees)')
         ax.set_ylabel('Energy (eV)')
         fig.show()
+        #The following saves the plot as a png file
+        #fig.savefig('energythetaplot.png')
 
     def plotPhiTheta(self):
         
@@ -528,6 +533,8 @@ class Spectrum:
         ax.set_xlabel('Phi Angle (Degrees)')
         ax.set_ylabel('Theta Angle (Degrees)')
         fig.show()
+        #The following saves the plot as a png file
+        #fig.savefig('thetaphiplot.png')
         
     def detectorSelection(self):
         dropdown = QComboBox()
