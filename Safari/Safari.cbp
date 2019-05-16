@@ -75,6 +75,7 @@
 		<Unit filename="../src/safio.f">
 			<Option weight="0" />
 		</Unit>
+		<Unit filename="../src/safsub_adaptive.f" />
 		<Unit filename="../src/safsubs.f">
 			<Option weight="0" />
 		</Unit>

@@ -35,7 +35,7 @@
 707       continue
               nber=1000
               call output(nber+1)
- 808  continue
+808   continue
       end
 
       subroutine gridscat(offx,offy, px0, py0, pz1, npart)
@@ -77,7 +77,7 @@
 707       continue
               nber=iy
               call output(nber+1)
- 808  continue
+808   continue
       end
 
       subroutine chainscat(offx,offy, px0, py0, pz1, npart)

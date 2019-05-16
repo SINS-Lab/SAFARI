@@ -1,0 +1,439 @@
+
+      subroutine adaptivescat(offx,offy)
+*     Runs the adaptive grid scattering algorithm
+      implicit real*8 (a-h,o-z)
+      include "params.txt"
+
+      LOGICAL PBC
+C               ARE THERE PERIODIC BOUNDARY CONDITIONS?
+C               (I.E. DOES FAX=FAY=1?)
+C
+      REAL*8 XLL(NARRAY),YLL(NARRAY)
+C               COORDINATES OF LOWER LEFT HAND CORNER OF CELL.
+C
+      INTEGER PADD(NARRAY),PSUB(NARRAY)
+C               PADD(I) IS THE ADDRESS OF THE PARENT OF THE ITH CELL.
+C               PADD(PADD(I)) IS THE ADDRESS OF THE GRANDPARENT OF THE
+C               ITH CELL. THE ITH CELL IS THE PSUB(I) SUBCELL OF ITS
+C               PARENT.
+C                       5 = 0101 = SW
+C                       6 = 0110 = SE
+C                       9 = 1001 = NW
+C                       10= 1010 = NE
+C
+      REAL*8 ENRGY(NARRAY),THETA(NARRAY),PHI(NARRAY)
+      INTEGER SUBADD(4,NARRAY),TRJADD(4,NARRAY)
+C               SUBADD(J,I) IS THE ADDRESS WITHIN XLL, LEVEL, PADD,
+C               ETC. OF THE JTH SUBCELL OF THE ITH CELL.
+C               TRJADD(J,I) IS THE ADDRESS WITHIN ENERGY, THETA, PHI
+C               OF THE TRAJECTORY WHOSE IMPACT PARAMETER LIES ON THE
+C               JTH CORNER OF THE       ITH CELL.
+C
+      INTEGER CPOINT
+C               CPOINT GIVES THE NEXT VACANT SPACE IN XLL,YLL,PADD,
+C               PSUB,SUBADD, AND TRJADD. IT IS THE CELL POINTER.
+C
+      INTEGER SEARCH
+C               SEARCH IS THE FUNCTION THAT FINDS NEIGHBORING CELLS
+C               OF THE GRID.
+      INTEGER CCELL(MXDIV),NDIV,PARENT,NBOR,EDGE
+C               CCELL(NDIV) IS THE ADDRESS WITHIN XLL, ETC. OF THE
+C               CURRENT CELL, SOMETIMES CALLED PARENT.
+C               NDIV IS THE CURRENT GRID NESTING DEPTH.
+C               NBOR IS THE ADDRESS OF A NEIGHBORING CELL,
+C               RETURNED BY SEARCH.
+C               EDGE TELLS SEARCH WHICH NEIGHBOR TO LOOK FOR.
+C
+      INTEGER*4 ITOTJ
+      REAL*8 AREA(NARRAY)
+C               AREA STORES THE AREA OF THE CELL ASSOCIATED WITH
+C               THE TRAJECTORY.
+      INTEGER TPOINT
+C               TPOINT INDICATES THE NEXT VACANT POSITION IN AREA,
+C               ENRGY, THETA, ETC. IT IS THE TRAJECTORY POINTER.
+      LOGICAL DTECT
+C               DTECT IS A FUNCTION THAT TRIES TO FIT THE TRAJECTORIES
+C               OF A CELL INTO A BIN OF THE DETECTOR AND INCREMENTS AREA
+C               ACCORDINGLY. DTECT RETURNS .TRUE. IF SUCCESSFUL.
+      INTEGER SW,SE,NW,NE
+C
+      LOGICAL START
+C
+      INTEGER I,J
+      INTEGER NITER
+C
+C
+      INTEGER ITRAJ
+
+COMMON!!
+      COMMON/XTAL/AX,AY
+      COMMON/MOMENT/PX(NARRAY),PY(NARRAY),PZ(NARRAY)
+      COMMON/POINTS/XTRAJ(NARRAY),YTRAJ(NARRAY),LEVEL(NARRAY)
+      COMMON/PBC/PBC,NWRITX,NWRITY
+
+      COMMON/RANDOM/SEED,NITER
+      COMMON/OTHER/Z1,MAXDIV,MINDIV,FAX,FAY,START,NPART
+      COMMON/TRAJS/ENRGY,THETA,PHI,TRJADD
+
+      DATA SW,SE,NW,NE/5,6,9,10/
+
+C THE EFFECTIVE PRIMARY CELL HAS SIDES AXPRIM AND AYPRIM.
+C ONE EFFECTIVE PRIMARY CELL IS COVERED, THE RESULTS ARE
+C WRITTEN TO THE DISK, THE ARRAYS ARE REINITIALIZED, AND THE
+C NEXT EPC IS COVERED.
+      AXPRIM=AX*FAX/NWRITX
+      AYPRIM=AY*FAY/NWRITY
+C
+C LOOP OVER THERMAL CONFIGURATIONS
+      DO 2345 ISURF=1,NITER
+         SEED=RANDSF(SEED)
+C LOOP THROUGH THE PRIMARY CELLS.
+C
+         DO 12345 IEPCX=1,NWRITX
+         DO 12345 IEPCY=1,NWRITY
+C
+            NDUMP=0
+C
+C SET UP THE PRIMARY CELL.
+            XLL(1)=AXPRIM*(IEPCX-1)
+            YLL(1)=AYPRIM*(IEPCY-1)
+            NDIV=1
+            CCELL(1)=1
+            CPOINT=2
+C
+C INITIALIZE ARRAYS.
+            DO 90 I=1, NARRAY
+               PADD(I)=0
+               PSUB(I)=0
+               AREA(I)=0.
+               LEVEL(I)=0
+               DO 90 J=1, 4
+                  SUBADD(J,I)=0
+                  TRJADD(J,I)=0
+90          CONTINUE
+C
+C
+C COMPUTE THE TRAJECTORY AT THE ORIGIN OF THEPCRIMARY CELL.
+            XTRAJ(1) = XLL(1)
+            YTRAJ(1) = YLL(1)
+            X = XTRAJ(1) -OFFX
+            Y = YTRAJ(1) -OFFY
+            ITRAJ=1
+            CALL SCATTR(X,Y,Z1,PX0,PY0,PZ1,ENRGY(1),THETA(1),
+     &             PHI(1),PX(1),PY(1),PZ(1),NPART,ITRAJ)
+C           WRITE(6,*) '1'
+            IF(NDIV.LT.MINDIV) THEN
+               LEVEL(1)=MINDIV
+            ELSE
+               LEVEL(1)=NDIV
+            ENDIF
+            TRJADD(1,1)=1
+            IF(PBC) THEN
+               TRJADD(2,1)=1
+               TRJADD(3,1)=1
+               TRJADD(4,1)=1
+               TPOINT=2
+            ELSE
+               XTRAJ(2) = XLL(1)+AXPRIM
+               YTRAJ(2) = YLL(1)
+               X = XTRAJ(2) -OFFX
+               Y = YTRAJ(2) -OFFY
+               ITRAJ=2
+               CALL SCATTR(X,Y,Z1,PX0,PY0,PZ1,ENRGY(2),THETA(2),
+     &                PHI(2),PX(2),PY(2),PZ(2),NPART,ITRAJ)
+C              WRITE(6,*) '2'
+               IF(NDIV.LT.MINDIV) THEN
+                  LEVEL(2)=MINDIV
+               ELSE
+                  LEVEL(2)=NDIV
+               ENDIF
+               TRJADD(2,1)=2
+C
+               XTRAJ(3) = XLL(1)
+               YTRAJ(3) = YLL(1)+AYPRIM
+               X = XTRAJ(3) -OFFX
+               Y = YTRAJ(3) -OFFY
+               ITRAJ=3
+               CALL SCATTR(X,Y,Z1,PX0,PY0,PZ1,ENRGY(3),THETA(3),
+     &                PHI(3),PX(3),PY(3),PZ(3),NPART,ITRAJ)
+C              WRITE(6,*) '3'
+               IF(NDIV.LT.MINDIV) THEN
+                  LEVEL(3)=MINDIV
+               ELSE
+                  LEVEL(3)=NDIV
+               ENDIF
+               TRJADD(3,1)=3
+C
+               XTRAJ(4) = XLL(1)+AXPRIM
+               YTRAJ(4) = YLL(1)+AYPRIM
+               X = XTRAJ(4) -OFFX
+               Y = YTRAJ(4) -OFFY
+               ITRAJ=4
+               CALL SCATTR(X,Y,Z1,PX0,PY0,PZ1,ENRGY(4),THETA(4),
+     &                PHI(4),PX(4),PY(4),PZ(4),NPART,ITRAJ)
+C              WRITE(6,*) '4'
+               IF(NDIV.LT.MINDIV) THEN
+                  LEVEL(4)=MINDIV
+               ELSE
+                  LEVEL(4)=NDIV
+               ENDIF
+               TRJADD(4,1)=4
+C
+               TPOINT=5
+            ENDIF
+C
+C
+C
+C SUBDIVIDE THE CELL!
+C
+100         CONTINUE
+C
+C       DUMP TO SFDUMP SOMETIMES TO RECOVER FROM SYSTEM CRASHES.
+C
+C SET UP FOUR SUBCELLS AT CPOINT, CPOINT+1, CPOINT+2, CPOINT+3.
+C       LOADPARENT ADDRESS FOR FOUR SUBCELLS.
+            PARENT=CCELL(NDIV)
+            DO 110 I=1,4
+               PADD(CPOINT-1+I)=PARENT
+               SUBADD(I,PARENT)=CPOINT-1+I
+110         CONTINUE
+C
+C COMPUTE COORDINATES OF LOWER LEFT HAND CORNERS OF SUBCELLS.
+            AXC=AXPRIM/2.**NDIV
+            AYC=AYPRIM/2.**NDIV
+            XLL(CPOINT)=XLL(PARENT)
+            YLL(CPOINT)=YLL(PARENT)
+            XLL(CPOINT+1)=XLL(PARENT)+AXC
+            YLL(CPOINT+1)=YLL(PARENT)
+            XLL(CPOINT+2)=XLL(PARENT)
+            YLL(CPOINT+2)=YLL(PARENT)+AYC
+            XLL(CPOINT+3)=XLL(CPOINT+1)
+            YLL(CPOINT+3)=YLL(CPOINT+2)
+C
+C LOAD RELATIVE LOCATIONS OF SUBCELLS.
+            PSUB(CPOINT)=SW
+            PSUB(CPOINT+1)=SE
+            PSUB(CPOINT+2)=NW
+            PSUB(CPOINT+3)=NE
+C
+C GO DOWN TO THE LEVEL OF THE SUBCELLS AND COMPUTE TRAJECTORIES.
+            NDIV=NDIV+1
+C
+C THE TRAJECTORIES OF THEPARENT CELL ARE ALSO TRAJECTORIES OF THE SUBCE
+            DO 120 I=1,4
+               TRJADD(I,CPOINT-1+I)=TRJADD(I,PARENT)
+120         CONTINUE
+C
+C COMPUTE THE TRAJECTORY AT THE CENTER OF THEPARENT CELL.
+            XTRAJ(TPOINT) = XLL(CPOINT+3)
+            YTRAJ(TPOINT) = YLL(CPOINT+3)
+            X = XTRAJ(TPOINT) -OFFX
+            Y = YTRAJ(TPOINT) -OFFY
+            ITRAJ=TPOINT
+            CALL SCATTR(X,Y,Z1,PX0,PY0,PZ1,ENRGY(TPOINT),THETA(TPOINT),
+     1       PHI(TPOINT),PX(TPOINT),PY(TPOINT),PZ(TPOINT),NPART,TPOINT)
+C           WRITE(6,*) '*',TPOINT,X,Y
+            IF(NDIV.LT.MINDIV) THEN
+               LEVEL(TPOINT)=MINDIV
+            ELSE
+               LEVEL(TPOINT)=NDIV
+            ENDIF
+            DO 130 I=1,4
+               TRJADD(I,CPOINT+4-I)=TPOINT
+130         CONTINUE
+            TPOINT=TPOINT+1
+C               IF TOO MANY TRAJECTORIES HAVE BEEN COMPUTED, QUIT.
+            IF(TPOINT.GT.NARRAY) GO TO 6666
+C
+C
+C FIND OUT WHETHER THE TRAJECTORIES ON THE EDGE OF THEPARENT CELL HAVE
+C COMPUTED. COPY THE DATA TO THE SUBCELLS IF IT HAS BEEN COMPUTED, OR CO
+C THE TRAJECTORIES IF NECESSARY.
+C
+C       FIRST, THE ADVENTUROUS WEST...
+            EDGE=1
+C       NBOR IS THE ADDRESS OF THE NEIGHBORING CELL ON THE EDGE IN QUEST
+            NBOR=SEARCH(EDGE,PARENT,PSUB,PADD,SUBADD)
+C       IF CELL NBOR HAS SUBCELLS, THEN THE TRAJECTORY HAS BEEN COMPUTED
+C       IF NBOR IS ZERO, THEN THE NEIGHBORING CELL DOES NOT EXIST.
+            IF(NBOR.NE.0 .AND. SUBADD(4,NBOR).NE.0) THEN
+C                       THE TRAJECTORY IS FOUND IN A SUBCELL OF NBOR.
+               TRJADD(3,CPOINT)=TRJADD(2,SUBADD(4,NBOR))
+               TRJADD(1,CPOINT+2)=TRJADD(3,CPOINT)
+            ELSE
+C                       THE TRAJECTORY IS NOT FOUND. COMPUTE IT.
+               XTRAJ(TPOINT) = XLL(CPOINT+2)
+               YTRAJ(TPOINT) = YLL(CPOINT+2)
+               X = XTRAJ(TPOINT) -OFFX
+               Y = YTRAJ(TPOINT) -OFFY
+               ITRAJ=TPOINT
+               CALL SCATTR(X,Y,Z1,PX0,PY0,PZ1,
+     1                ENRGY(TPOINT),THETA(TPOINT),PHI(TPOINT),
+     1                PX(TPOINT),PY(TPOINT),PZ(TPOINT),NPART,TPOINT)
+C              WRITE(6,*) '*',TPOINT,X,Y
+               IF(NDIV.LT.MINDIV) THEN
+                  LEVEL(TPOINT)=MINDIV
+               ELSE
+                  LEVEL(TPOINT)=NDIV
+               ENDIF
+               TRJADD(3,CPOINT)=TPOINT
+               TRJADD(1,CPOINT+2)=TPOINT
+               TPOINT=TPOINT+1
+               IF(TPOINT.GT.NARRAY) GO TO 6666
+            ENDIF
+C
+C ... THEN THE MYSTERIOUS EAST...
+            EDGE=2
+            NBOR=SEARCH(EDGE,PARENT,PSUB,PADD,SUBADD)
+            IF(NBOR.NE.0 .AND. SUBADD(1,NBOR).NE.0) THEN
+C                       THE TRAJECTORY IS FOUND IN A SUBCELL OF NBOR.
+               TRJADD(4,CPOINT+1)=TRJADD(3,SUBADD(1,NBOR))
+               TRJADD(2,CPOINT+3)=TRJADD(4,CPOINT+1)
+            ELSE
+C                       THE TRAJECTORY IS NOT FOUND. COMPUTE IT.
+               XTRAJ(TPOINT) = XLL(CPOINT+3) +AXC
+               YTRAJ(TPOINT) = YLL(CPOINT+3)
+               X = XTRAJ(TPOINT) -OFFX
+               Y = YTRAJ(TPOINT) -OFFY
+               ITRAJ=TPOINT
+               CALL SCATTR(X,Y,Z1,PX0,PY0,PZ1,
+     1                ENRGY(TPOINT),THETA(TPOINT),PHI(TPOINT),
+     2                PX(TPOINT),PY(TPOINT),PZ(TPOINT),NPART,TPOINT)
+C              WRITE(6,*) '*',TPOINT,X,Y
+               IF(NDIV.LT.MINDIV) THEN
+                  LEVEL(TPOINT)=MINDIV
+               ELSE
+                  LEVEL(TPOINT)=NDIV
+               ENDIF
+               TRJADD(4,CPOINT+1)=TPOINT
+               TRJADD(2,CPOINT+3)=TPOINT
+               TPOINT=TPOINT+1
+               IF(TPOINT.GT.NARRAY) GO TO 6666
+            ENDIF
+C
+C ... AND THE TORRID SOUTH...
+            EDGE=4
+            NBOR=SEARCH(EDGE,PARENT,PSUB,PADD,SUBADD)
+            IF(NBOR.NE.0 .AND. SUBADD(4,NBOR).NE.0) THEN
+C                       THE TRAJECTORY IS FOUND IN A SUBCELL OF NBOR.
+               TRJADD(2,CPOINT)=TRJADD(3,SUBADD(4,NBOR))
+               TRJADD(1,CPOINT+1)=TRJADD(2,CPOINT)
+            ELSE
+C                       THE TRAJECTORY IS NOT FOUND. COMPUTE IT.
+               XTRAJ(TPOINT) = XLL(CPOINT+1)
+               YTRAJ(TPOINT) = YLL(CPOINT+1)
+               X = XTRAJ(TPOINT) -OFFX
+               Y = YTRAJ(TPOINT) -OFFY
+               ITRAJ=TPOINT
+               CALL SCATTR(X,Y,Z1,PX0,PY0,PZ1,
+     1                ENRGY(TPOINT),THETA(TPOINT),PHI(TPOINT),
+     2                PX(TPOINT),PY(TPOINT),PZ(TPOINT),NPART,TPOINT)
+C              WRITE(6,*) '*',TPOINT,X,Y
+               IF(NDIV.LT.MINDIV) THEN
+                  LEVEL(TPOINT)=MINDIV
+               ELSE
+                  LEVEL(TPOINT)=NDIV
+               ENDIF
+               TRJADD(2,CPOINT)=TPOINT
+               TRJADD(1,CPOINT+1)=TPOINT
+               TPOINT=TPOINT+1
+               IF(TPOINT.GT.NARRAY) GO TO 6666
+            ENDIF
+C
+C ... FOLLOWED BY THE FRIGID AND EVERPCERILOUS NORTH.
+            EDGE=8
+            NBOR=SEARCH(EDGE,PARENT,PSUB,PADD,SUBADD)
+            IF(NBOR.NE.0 .AND. SUBADD(1,NBOR).NE.0) THEN
+C                   THE TRAJECTORY IS FOUND IN A SUBCELL OF NBOR.
+               TRJADD(4,CPOINT+2)=TRJADD(2,SUBADD(1,NBOR))
+               TRJADD(3,CPOINT+3)=TRJADD(4,CPOINT+2)
+            ELSE
+C                      THE TRAJECTORY IS NOT FOUND. COMPUTE IT.
+               XTRAJ(TPOINT) = XLL(CPOINT+3)
+               YTRAJ(TPOINT) = YLL(CPOINT+3)+AYC
+               X = XTRAJ(TPOINT) -OFFX
+               Y = YTRAJ(TPOINT) -OFFY
+               ITRAJ=TPOINT
+               CALL SCATTR(X,Y,Z1,PX0,PY0,PZ1,
+     1                ENRGY(TPOINT),THETA(TPOINT),PHI(TPOINT),
+     2                PX(TPOINT),PY(TPOINT),PZ(TPOINT),NPART,TPOINT)
+C              WRITE(6,*) '*',TPOINT,X,Y
+               IF(NDIV.LT.MINDIV) THEN
+                  LEVEL(TPOINT)=MINDIV
+               ELSE
+                  LEVEL(TPOINT)=NDIV
+               ENDIF
+               TRJADD(4,CPOINT+2)=TPOINT
+               TRJADD(3,CPOINT+3)=TPOINT
+               TPOINT=TPOINT+1
+               IF(TPOINT.GT.NARRAY) GO TO 6666
+            ENDIF
+C
+C
+            CPOINT=CPOINT+4
+            IF(CPOINT.GT.(NARRAY-3)) GO TO 6667
+C
+C THE TRAJECTORIES AT THE CORNERS OF THE SUBCELLS ARE ALL COMPUTED.
+*            IF(NDIV.EQ.MAXDIV) THEN
+C              WRITE(6,8888)
+*            ENDIF
+C8888        FORMAT(' AT SMALLEST GRID SIZE.')
+C
+C LOOP THROUGH THE NEW CELLS. TRY TO STORE DATA IN DETECT, IF IMPOSSIBLE
+C THEN SUBDIVIDE (I.E. GO TO 100).
+            CCELL(NDIV)=SUBADD(1,PARENT)
+C
+150         CONTINUE
+C       SUBDIVIDE IF THE GRID IS STILL TOO COARSE, REGARDLESS OF TRAJECT
+            IF(NDIV.LT.MINDIV) GO TO 100
+C           WRITE(0,*) 'CALLING DTECT:NDIV=',NDIV,' CELL=',CCELL(NDIV)
+            IF(DTECT(CCELL(NDIV),NDIV,MAXDIV)) GO TO 160
+            GO TO 100
+C
+C       TRAJECTORIES HAVE BEEN DETECTED. GO TO NEXT CELL.
+160         CONTINUE
+C           WRITE(6,*) 'DTECT = .TRUE.'
+            IF(PSUB(CCELL(NDIV)).EQ.SW) THEN
+               CCELL(NDIV)=SUBADD(2,PADD(CCELL(NDIV)))
+            ELSE IF(PSUB(CCELL(NDIV)).EQ.SE) THEN
+               CCELL(NDIV)=SUBADD(3,PADD(CCELL(NDIV)))
+            ELSE IF(PSUB(CCELL(NDIV)).EQ.NW) THEN
+               CCELL(NDIV)=SUBADD(4,PADD(CCELL(NDIV)))
+            ELSE IF(PSUB(CCELL(NDIV)).EQ.NE) THEN
+C               DONE WITH ALL SUBCELLS OF THE IMMEDIATEPARENT.
+               NDIV=NDIV-1
+C               IS THE UNIT CELL FINISHED?
+               IF(NDIV.EQ.1) GO TO 300
+C               GET NEXT CELL OF CURRENT LEVEL.
+               GO TO 160
+            ENDIF
+C
+            GO TO 150
+C
+C
+C DONE WITH DATA ACQUISITION.
+300         CONTINUE
+            ITOTJ=ITOTJ+TPOINT-1
+            KK=0
+C
+C DO NEXTPCRIMARY CELL.
+            Call Output(Tpoint)
+12345    CONTINUE
+C GET NEXT THERMAL CONFIGURATION
+2345  CONTINUE
+
+6666  CONTINUE
+      WRITE(0,6002) NARRAY
+      WRITE(10,6002) NARRAY
+6002  FORMAT(' ??',I6,' TRAJECTORIES COMPUTED. ARRAYS TOO SMALL??')
+      CALL OUTPUT(TPOINT)
+      STOP
+C
+6667  CONTINUE
+      WRITE(0,6003) NARRAY
+      WRITE(10,6003) NARRAY
+6003  FORMAT('???? ',I6,' CELLS USED. ARRAYS TOO SMALL. ????')
+      CALL OUTPUT(TPOINT)
+      STOP
+
+      end
