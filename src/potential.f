@@ -14,16 +14,6 @@ C
       Common/ZPARS/ZBLPAR(NTYPEMAX+1),ZPARTICLES
       COMMON/CHARGE/CHARGE
       DATA ESQR/14.398D0/
-C  ZBL SCREENING FUNCTION.
-      PHI(X)=.1818D0*DEXP(-3.2D0*X)
-     1   +.2802D0*DEXP(-.4029D0*X)
-     2   +0.02817D0*DEXP(-.2016D0*X)
-     3   +0.5099D0*DEXP(-0.9423D0*X)
-C  DERIVATIVE OF SCREENING FUNCTION WRT X.
-      PPRIME(X)=-.58176D0*DEXP(-3.2D0*X)
-     1   -.112893D0*DEXP(-.4029D0*X)
-     2   -0.005679D0*DEXP(-.2016D0*X)
-     3   -0.48048D0*DEXP(-0.9423D0*X)
 C
       IF(IPOT.EQ.1) THEN
 C TWO-EXPONENTIAL POTENTIAL
@@ -34,7 +24,7 @@ C TWO-EXPONENTIAL POTENTIAL
          B2=POTPAR(INDEX+4)
          DVDR=-B1*A1*DEXP(-B1*R)-B2*A2*DEXP(-B2*R)
       ELSE IF(IPOT.EQ.2) THEN
-C ZBL TYPE POTENTIAL
+C  ZBL TYPE POTENTIAL
 C
          zion=ZBLPAR(1)
          SCREEN=ZBLPAR(NV+1)
@@ -73,16 +63,6 @@ C****************************************************
       Common/ZPARS/ZBLPAR(NTYPEMAX+1),ZPARTICLES
       COMMON/CHARGE/CHARGE
       DATA ESQR/14.398D0/
-C  ZBL SCREENING FUNCTION.
-      PHI(X)=.1818D0*DEXP(-3.2D0*X)
-     1   +.2802D0*DEXP(-.4029D0*X)
-     2   +0.02817D0*DEXP(-.2016D0*X)
-     3   +0.5099D0*DEXP(-0.9423D0*X)
-C  DERIVATIVE OF SCREENING FUNCTION WRT X.
-      PPRIME(X)=-.58176D0*DEXP(-3.2D0*X)
-     1   -.112893D0*DEXP(-.4029D0*X)
-     2   -0.005679D0*DEXP(-.2016D0*X)
-     3   -0.48048D0*DEXP(-0.9423D0*X)
 C
       IF(IPOT.EQ.1) THEN
 C TWO-EXPONENTIAL POTENTIAL
@@ -94,6 +74,7 @@ C TWO-EXPONENTIAL POTENTIAL
          VR=A1*DEXP(-B1*R)+A2*EXP(-B2*R)
       ELSE IF(IPOT.EQ.2) THEN
 C ZBL TYPE POTENTIAL
+C
          INDEX=2*(NV-1)
 C
          zion=ZBLPAR(1)
@@ -123,6 +104,28 @@ C EXPONENTIAL PLUS GAUSSIAN POTENTIAL
          write(0,*) 'unacceptable value for ipot'
          stop
       ENDIF
+      RETURN
+      END
+C***********************************************************************
+C ZBL Helper Functions
+
+      DOUBLE PRECISION FUNCTION PHI(X)
+*     ZBL Screening Function
+      real*8 X
+         PHI =.1818D0*DEXP(-3.2D0*X)
+     1   +.2802D0*DEXP(-.4029D0*X)
+     2   +0.02817D0*DEXP(-.2016D0*X)
+     3   +0.5099D0*DEXP(-0.9423D0*X)
+      RETURN
+      END
+
+      DOUBLE PRECISION FUNCTION PPRIME(X)
+*     Derivative of ZBL Screening Function
+      real*8 X
+         PPRIME =-.58176D0*DEXP(-3.2D0*X)
+     1   -.112893D0*DEXP(-.4029D0*X)
+     2   -0.005679D0*DEXP(-.2016D0*X)
+     3   -0.48048D0*DEXP(-0.9423D0*X)
       RETURN
       END
 
