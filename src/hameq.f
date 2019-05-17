@@ -1,6 +1,10 @@
       SUBROUTINE HAMEQ(X,Y,Z,PX,PY,PZ,XAT,YAT,ZAT,
      1                          PXAT,PYAT,PZAT,NPART,LCALCV)
-C
+* X,Y,Z,PX,PY,PZ are the positions and momenta of the projectile.
+* XAT, YAT, ZAT, PXAT, PYAT, PZAT are arrays of
+* positions and momenta of the lattice.
+* NPART is the number of particles in the lattice under consideration.
+* LCALCV is a flag for whether to calculate total potential energy.
 
 c handles correlated atom-atom forces
 C EVALUATE HAMILTON'S EQUATIONS FOR NPART PARTICLES.

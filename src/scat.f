@@ -179,6 +179,7 @@ C
       COMMON/RANDOM/SEED,NITER
       COMMON/CHAIN/XSTART,YSTART,XSTEP,YSTEP,NUMCHA
       common/ztraj/ztraj
+*     This is the lowest z that the projectile reached.
       common/depth/depth
       common/nat1/nat1
       depth=1.d22
