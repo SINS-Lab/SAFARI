@@ -16,6 +16,11 @@ def generate(basename, tstart, tend, pstart, pend, estart, eend, res=0.025,\
         os.mkdir(rundir)
     except:
         pass
+    rundir = os.path.join(rundir,basename)
+    try:
+        os.mkdir(rundir)
+    except:
+        pass
     for theta in frange(tstart, tend + tstep, tstep):
         for phi in frange(pstart, pend + pstep, pstep):
             for e0 in frange(estart, eend + estep, estep):
@@ -29,9 +34,9 @@ def generate(basename, tstart, tend, pstart, pend, estart, eend, res=0.025,\
                 safio.PHI0 = phi
                 # Set energy resolution to 1%
                 safio.ESIZE = e0/100
-                filename = os.path.join(edir,basename)
-                filename = filename +'_'+str(e0)+'_'+str(theta)\
-                                    +'_'+str(phi)+'.input'
+                filename = str(e0)+'_'+str(theta)\
+                                  +'_'+str(phi)+'.input'
+                filename = os.path.join(edir,filename)
                 safio.save(file=filename)
 
 if __name__ == '__main__':
