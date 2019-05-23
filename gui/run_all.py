@@ -36,8 +36,11 @@ def run(threads, directory='.', recursive=True):
                         processes.remove(p)
                         break
                 time.sleep(1)
-                    
-                    
+    # Wait for all remaining processes to finish before closing.
+    for p in processes:
+        p.wait()
+    return
+    
 if __name__ == '__main__':
 #    run()
     txtnum = input("Number of Threads? ")
