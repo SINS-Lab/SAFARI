@@ -27,12 +27,17 @@ def run(threads, directory='.', recursive=True):
             #Wait a second for it to start running
             time.sleep(1)
             number = number + 1
-            # If hit number to run, wait for all runs to finish, before continuing.
-            if number > threads:
+            # If hit number to run, wait for a run to finish, before continuing.
+            while number > threads:
                 for p in processes:
-                    p.wait()
-                processes = []
-                number = 1
+                    p.poll()
+                    if p.returncode != None:
+                        number = number - 1
+                        processes.remove(p)
+                        break
+                time.sleep(1)
+                    
+                    
 if __name__ == '__main__':
 #    run()
     txtnum = input("Number of Threads? ")
