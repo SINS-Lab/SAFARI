@@ -398,7 +398,7 @@ C IF NWRITX .EQ.666 and NWRITY.EQ.777 THEN DO Grid
       call adaptivescat(OFFX, OFFY)
 C  TODO move this stuff here also into adaptivescat
       WRITE(10,3533) ITOTJ
-3533  FORMAT(1X,'NUMBER OF TRAJS. TOTAL = ',I6)
+3533  FORMAT(1X,'NUMBER OF TRAJS. TOTAL = ',I8)
       WRITE(10,3534) NONRES
 3534  FORMAT(1X, 'NUMBER OF UNSATISFACTORY CELLS =',I6)
       WRITE(10,9001) (1.*NONRES)/(1.*NUMCEL)
@@ -442,7 +442,7 @@ C
       write(10,9102) tarray(2)
       write(10,9103) 1000. * tarray(1)/numcha
 
-5533  format(1X,'NUMBER OF TRAJS. TOTAL = ',i6)
+5533  format(1X,'NUMBER OF TRAJS. TOTAL = ',i8)
 9101  format(1x,'CPU time = ',f16.4,' secs')
 9102  format(1x,'System paging time = ',f16.4,' secs')
 9103  format(1x,'CPU time Per Particle= ',f16.4,' ms')
