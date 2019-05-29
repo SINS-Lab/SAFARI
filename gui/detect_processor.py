@@ -64,7 +64,6 @@ def loadFromText(file):
         n = n + 1
     return data
         
-
 def loadFromCache(cache):
     return np.load(cache+'.npy')
 

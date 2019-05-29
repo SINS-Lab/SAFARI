@@ -9,8 +9,6 @@ import matplotlib
 #Qt5Agg is the backend
 matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle
-from matplotlib.collections import PatchCollection
 import safari_input
 import subprocess
 import xyz_postprocess as xyz_p

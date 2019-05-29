@@ -332,9 +332,7 @@ def addDropdownItems(dropdown, directory, subdirectories):
         if subdirectories and os.path.isdir(filename):
             newDir = os.path.join(directory, filename)
             addDropdownItems(dropdown, newDir, False)
-    
-
-        
+   
 def fileSelection():
     dropdown = QComboBox()
     directory = '.'
@@ -345,7 +343,7 @@ def run(spectrum):
     app = QApplication([])
     window = QWidget()
     layout = QGridLayout()
-    
+    app.spectrums = []
     sublayout = QHBoxLayout()
     label = QLabel('input file name')
     filebox = fileSelection()
@@ -364,6 +362,7 @@ def run(spectrum):
         data = detect.load(filebox.currentText())
         try:
             spectrum = Spectrum()
+            app.spectrums.append(spectrum)
             file = filebox.currentText()
             spectrum.name = file
             filename = os.path.basename(file)
@@ -396,6 +395,7 @@ def run(spectrum):
             data = detect.load(file)
             try:
                 spectrum = Spectrum()
+                app.spectrums.append(spectrum)
                 spectrum.name = file
                 filename = os.path.basename(file)
                 if file.endswith('.data'):
@@ -422,6 +422,13 @@ def run(spectrum):
     box.addWidget(run_all)
 
     layout.addLayout(box, x + 10, y)
+    
+    # Button to clear spectrums
+    clear = QPushButton('Clear')
+    def clear_func():
+        app.spectrums = []
+    clear.clicked.connect(clear_func)
+    layout.addWidget(clear)
     
     # Button to close the window
     close = QPushButton('Close')
