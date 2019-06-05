@@ -6,6 +6,7 @@ import os
 import math
 import time
 import numpy as np
+import platform
 #if you utilize the following two lines you will be able to run 
 #the figures in here. This requires changing the backend of the fig.show()
 #for more backend choices please see https://matplotlib.org/tutorials/introductory/usage.html#what-is-a-backend
