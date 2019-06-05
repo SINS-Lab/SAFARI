@@ -60,7 +60,7 @@ def makeDIVSPopup(safari, layout, label, text, name, subindex):
         layout = QGridLayout()
         
         temp = QHBoxLayout()
-        label = QLabel('NUMCHA')
+        label = QLabel('Shot Count')
         textn = QLineEdit(str(safari.NUMCHA))
         def edit():
             safari.NUMCHA = parseVar(textn.displayText())
@@ -71,7 +71,7 @@ def makeDIVSPopup(safari, layout, label, text, name, subindex):
         layout.addLayout(temp, 0, 0)
         
         temp = QHBoxLayout()
-        label = QLabel('XSTART')
+        label = QLabel('Minimum X')
         textxa = QLineEdit(str(safari.XSTART))
         def edit():
             safari.XSTART = parseVar(textxa.displayText())
@@ -93,7 +93,7 @@ def makeDIVSPopup(safari, layout, label, text, name, subindex):
         layout.addLayout(temp, 20, 0)
         
         temp = QHBoxLayout()
-        label = QLabel('YSTART')
+        label = QLabel('Minimum Y')
         textya = QLineEdit(str(safari.YSTART))
         def edit():
             safari.YSTART = parseVar(textya.displayText())
@@ -858,9 +858,9 @@ def initBoxes(safari, layout):
     layout.addLayout(box,x,y + 10)
     
     x+=10
-    box = makeInputBox(safari, 'DEMAX - Max Energy Diff?', 6, 0)
+    box = makeInputBox(safari, 'Euler Error Max', 6, 0)
     layout.addLayout(box,x,y + 00)
-    box = makeInputBox(safari, 'DEMIN - Min Energy Diff?', 6, 1)
+    box = makeInputBox(safari, 'Euler Error Min', 6, 1)
     layout.addLayout(box,x,y + 10)
     box = makeInputBox(safari, 'ABSERR?', 6, 2)
     layout.addLayout(box,x,y + 20)
@@ -891,7 +891,7 @@ def initBoxes(safari, layout):
     layout.addLayout(box,x,y + 00)
     box = makeInputBox(safari, 'MINDIV', 13, 1)
     layout.addLayout(box,x,y + 10)
-    box = makeInputBox(safari, 'Extra, Used if MAXDIV==MINDIV==1', 13, 2)
+    box = makeInputBox(safari, 'Impact Parameters', 13, 2)
     layout.addLayout(box,x,y + 20)
     
     x+=10
@@ -901,9 +901,9 @@ def initBoxes(safari, layout):
     layout.addLayout(box,x,y + 10)
     
     x+=10
-    box = makeInputBox(safari, 'FAX', 15, 0)
+    box = makeInputBox(safari, 'Maximum X (Fraction of Lattice)', 15, 0)
     layout.addLayout(box,x,y + 00)
-    box = makeInputBox(safari, 'FAY', 15, 1)
+    box = makeInputBox(safari, 'Maximum Y (Fraction of Lattice)', 15, 1)
     layout.addLayout(box,x,y + 10)
     
     x+=10
