@@ -3,9 +3,7 @@ import subprocess
 import time
 import platform
 
-def run(threads, directory='.', recursive=True):
-    processes = []
-    number = 1
+def run(threads, processes, directory='.', recursive=True):
     
     command = 'Safari.exe'
     if platform.system() == 'Linux':
@@ -14,7 +12,7 @@ def run(threads, directory='.', recursive=True):
     for filename in os.listdir(directory):
         truefile = os.path.join(directory, filename)
         if recursive and os.path.isdir(truefile):
-            run(threads, truefile)
+            run(threads, processes, truefile)
             continue
         if filename.endswith(".input") and not filename==('safari.input'):
             file = os.path.join(directory, filename).replace('.input','')
@@ -26,19 +24,15 @@ def run(threads, directory='.', recursive=True):
             processes.append(process)
             #Wait a second for it to start running
             time.sleep(1)
-            number = number + 1
+            number = len(processes) + 1
             # If hit number to run, wait for a run to finish, before continuing.
             while number > threads:
                 for p in processes:
                     p.poll()
                     if p.returncode != None:
-                        number = number - 1
                         processes.remove(p)
                         break
                 time.sleep(1)
-    # Wait for all remaining processes to finish before closing.
-    for p in processes:
-        p.wait()
     return
     
 if __name__ == '__main__':
@@ -48,4 +42,8 @@ if __name__ == '__main__':
     threads = int(txtnum)
     if rundir!='.':
         rundir = os.path.join('.',rundir)
-    run(threads, directory=rundir)
+    processes = []
+    run(threads, processes, directory=rundir)
+    # Wait for all remaining processes to finish before closing.
+    for p in processes:
+        p.wait()
