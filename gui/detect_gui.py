@@ -329,8 +329,8 @@ def addDropdownItems(dropdown, directory, subdirectories):
            and not (filename.endswith('_mod.input') or filename.endswith('_ss.input')):
             dropdown.addItem(os.path.join(directory, filename).replace('.input', ''))
         # Also add any input files in the next level down from here.
-        if subdirectories and os.path.isdir(filename):
-            newDir = os.path.join(directory, filename)
+        newDir = os.path.join(directory, filename)
+        if subdirectories and os.path.isdir(newDir):
             addDropdownItems(dropdown, newDir, True)
    
 def fileSelection():
