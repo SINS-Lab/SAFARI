@@ -907,21 +907,21 @@ def initBoxes(safari, layout):
     layout.addLayout(box,x,y + 10)
     
     x+=10
-    box = makeInputBox(safari, 'Image Potential Number', 16, 0)
+    box = makeInputBox(safari, 'Lattice Potential Number', 16, 0)
     layout.addLayout(box,x,y + 00)
-    box = makeInputBox(safari, 'Image Potential', 16, 1)
+    box = makeInputBox(safari, 'Lattice Potential', 16, 1)
     layout.addLayout(box,x,y + 10)
-    box = makeInputBox(safari, 'Image Potential Parameters', 17, 0)
+    box = makeInputBox(safari, 'Lattice Potential Parameters', 17, 0)
     layout.addLayout(box,x,y + 20)
     box = makeInputBox(safari, 'Use Image Charge', 21, 0)
     layout.addLayout(box,x,y + 30)
     
     x+=10
-    box = makeInputBox(safari, 'NImage Potential Number', 18, 0)
+    box = makeInputBox(safari, 'Image Potential Number', 18, 0)
     layout.addLayout(box,x,y + 00)
-    box = makeInputBox(safari, 'NImage Potential', 18, 1)
+    box = makeInputBox(safari, 'Image Potential', 18, 1)
     layout.addLayout(box,x,y + 10)
-    box = makeInputBox(safari, 'NImage Potential Parameters', 19, 0)
+    box = makeInputBox(safari, 'Image Potential Parameters', 19, 0)
     layout.addLayout(box,x,y + 20)
     # I need to also include a button for making a popup for the sub-values.
     
