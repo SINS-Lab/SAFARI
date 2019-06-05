@@ -331,7 +331,7 @@ def addDropdownItems(dropdown, directory, subdirectories):
         # Also add any input files in the next level down from here.
         if subdirectories and os.path.isdir(filename):
             newDir = os.path.join(directory, filename)
-            addDropdownItems(dropdown, newDir, False)
+            addDropdownItems(dropdown, newDir, True)
    
 def fileSelection():
     dropdown = QComboBox()
