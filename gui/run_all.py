@@ -32,6 +32,7 @@ def run(threads, processes, directory='.', recursive=True):
                     if p.returncode != None:
                         processes.remove(p)
                         break
+                number = len(processes) + 1
                 time.sleep(1)
     return
     
