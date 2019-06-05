@@ -25,8 +25,11 @@ class XYZ:
 class XYZ_Single:
     def __init__(self):
         self.number = 0
+        # For safari, this is time since start.
         self.comment = ''
+        # This is an array of atomic symbols
         self.atoms = []
+        # This is an array of the arrays of values for the atoms above.
         self.values = []
         
     def load(self, file, number):
@@ -35,6 +38,7 @@ class XYZ_Single:
         self.comment = file.readline()
         for i in range(number):
             line = file.readline().split()
+            # this is the array of values for the atom on this line
             value = []
             for j in range(len(line) - 1):
                 value.append(float(line[j + 1]))

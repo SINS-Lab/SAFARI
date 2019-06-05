@@ -91,10 +91,13 @@ def xyzFromParticles(time, pset):
     return xyz_single
 
 def process(xyz):
+    # Array of elapsed times
     times = []
+    # This is an array of arrays of Particles, which correspond to times
     particles = []
     n = 0
     for xyz_single in xyz.xyzs:
+        # Particle array for this timestep
         pset = []
         times.append(float(xyz_single.comment))
         for i in range(xyz_single.number):
@@ -130,11 +133,16 @@ def process(xyz):
         print('Merged '+str(n))
         print('Number Per Frame: '+str(len(particles[0])))
     print('Finished Merging')
-    xyz = XYZ()
+
     for pset in particles:
         def key(p):
             return p.id
         pset.sort(key=key)
+        
+    # TODO add something for smoothing the timing here.
+
+
+    xyz = XYZ()
     for i in range(len(times)):
         time = times[i]
         pset = particles[i]
