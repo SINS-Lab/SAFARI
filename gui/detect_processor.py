@@ -348,7 +348,12 @@ class Detector:
                 self.safio.XSTART = close[0]
                 self.safio.YSTART = close[1]
                 self.safio.genInputFile(fileIn=self.safio.fileIn)
-                sub = subprocess.run('Safari.exe', shell=True)
+
+                command = 'Safari.exe'
+                if platform.system() == 'Linux':
+                    command = './Safari'
+
+                sub = subprocess.run(command, shell=True)
                 close[0] = round(close[0],2)
                 close[1] = round(close[1],2)
                 name = self.safio.fileIn.replace('.input', '')
