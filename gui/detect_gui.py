@@ -361,7 +361,6 @@ def run(spectrum):
     def push():
         data = detect.load(filebox.currentText())
         try:
-            spectrum = Spectrum()
             app.spectrums.append(spectrum)
             file = filebox.currentText()
             spectrum.name = file
@@ -433,7 +432,10 @@ def run(spectrum):
     # Button to close the window
     close = QPushButton('Close')
     def done():
+        plt.close("all")
         window.close()
+        if spectrum.popup is not None:
+            spectrum.popup.close()
     close.clicked.connect(done)
     layout.addWidget(close)
     window.setLayout(layout)
