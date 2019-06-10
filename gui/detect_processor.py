@@ -341,7 +341,7 @@ class Detector:
                     close[1] = y[i]
                     index = i
 
-            if event.dblclick:
+            if event.dblclick and event.button.value != 3:
                 #Setup a single run safari for this.
                 self.safio.fileIn = self.safio.fileIn.replace('_mod.input', '_ss.input')
                 self.safio.setGridScat(True)
@@ -359,7 +359,29 @@ class Detector:
                 close[1] = round(close[1],2)
                 name = self.safio.fileIn.replace('.input', '')
                 xyz_p.process_file(name +'.xyz',\
-                                   name+str(close[0])+','+str(close[1])+'.xyz')
+                                   name+str(close[0])+','+str(close[1])+'.xyz', load_vmd=True)
+                print(sub)
+
+            if event.dblclick and event.button.value == 3:
+                #Setup a single run safari using colored data
+                print("Setting up a safari run for a colored dataset")
+                self.safio.fileIn = self.safio.fileIn.replace('_mod.input', '_ss.input')
+                self.safio.setGridScat(True)
+                self.safio.NUMCHA = 1
+                self.safio.XSTART = close[0]
+                self.safio.YSTART = close[1]
+                self.safio.genInputFile(fileIn=self.safio.fileIn)
+
+                command = 'Safari.exe'
+                if platform.system() == 'Linux':
+                    command = './Safari'
+
+                sub = subprocess.run(command, shell=True)
+                close[0] = round(close[0], 2)
+                close[1] = round(close[1], 2)
+                name = self.safio.fileIn.replace('.input', '')
+                xyz_p.process_file(name +'.xyz',\
+                                   name+str(close[0])+','+str(close[1])+'.xyz', color_nearest_neighbors=True, load_vmd=True)
                 print(sub)
 
             close[0] = round(close[0],5)
