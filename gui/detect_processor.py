@@ -20,6 +20,9 @@ import safari_input
 import subprocess
 import xyz_postprocess as xyz_p
 
+# Used for shift-click functionality
+shift_is_held = False
+
 def read(f, first, data):
     if first:
         #Emin EMax ESize ASize
@@ -268,12 +271,12 @@ class Detector:
                 fig.savefig('energyplot.png')
         return energy, intensity
         
-    def impactParam(self, basis = None, dx=0, dy=0):
-        x = self.detections[...,0]
-        y = self.detections[...,1]
-        c = self.detections[...,3]
+    def impactParam(self, basis=None, dx=0, dy=0):
+        x = self.detections[..., 0]
+        y = self.detections[..., 1]
+        c = self.detections[..., 3]
         
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(8.0, 6.0))
         patches = []
         colours = []
         
@@ -298,10 +301,6 @@ class Detector:
                         circle = Circle((site[0]+i*dx, site[1]+j*dy), 1)
                         patches.append(circle)
 
-#        #TODO better colouring.
-#        for i in range(len(site)):
-#            site[i] = site[i] - minz
-
         p = PatchCollection(patches, alpha=0.4)
         p.set_array(np.array(colours))
         
@@ -321,6 +320,7 @@ class Detector:
         ax.set_title("Detections: "+str(len(x)))
         ax.set_xlabel('X Target (Angstroms)')
         ax.set_ylabel('Y Target (Angstroms)')
+        fig.text(0.6, 0.9, "Left Click: View Point\nDouble Left Click: Open Normal-Colored VMD\nDouble Right Click: Open Nearest-Colored VMD\nShift + Left Click: Open Velocity-Colored VMD", fontsize=9)
 
         self.p, = ax.plot(0,0,'r+')
 
@@ -341,8 +341,8 @@ class Detector:
                     close[1] = y[i]
                     index = i
 
-            if event.dblclick and event.button.value != 3:
-                #Setup a single run safari for this.
+            if event.dblclick and event.button.value == 1 and not shift_is_held:
+                # Setup a single run safari for this.
                 self.safio.fileIn = self.safio.fileIn.replace('_mod.input', '_ss.input')
                 self.safio.setGridScat(True)
                 self.safio.NUMCHA = 1
@@ -358,13 +358,13 @@ class Detector:
                 close[0] = round(close[0],2)
                 close[1] = round(close[1],2)
                 name = self.safio.fileIn.replace('.input', '')
-                xyz_p.process_file(name +'.xyz',\
+                xyz_p.process_file(name + '.xyz',
                                    name+str(close[0])+','+str(close[1])+'.xyz', load_vmd=True)
                 print(sub)
 
             if event.dblclick and event.button.value == 3:
-                #Setup a single run safari using colored data
-                print("Setting up a safari run for a colored dataset")
+                # Setup a single run safari using nearness colored data
+                print("Setting up a safari run for a nearness colored dataset")
                 self.safio.fileIn = self.safio.fileIn.replace('_mod.input', '_ss.input')
                 self.safio.setGridScat(True)
                 self.safio.NUMCHA = 1
@@ -380,18 +380,52 @@ class Detector:
                 close[0] = round(close[0], 2)
                 close[1] = round(close[1], 2)
                 name = self.safio.fileIn.replace('.input', '')
-                xyz_p.process_file(name +'.xyz',\
-                                   name+str(close[0])+','+str(close[1])+'.xyz', color_nearest_neighbors=True, load_vmd=True)
+                xyz_p.process_file(name +'.xyz',
+                                   name+str(close[0])+','+str(close[1])+'.xyz', color="nearest", load_vmd=True)
                 print(sub)
 
-            close[0] = round(close[0],5)
-            close[1] = round(close[1],5)
-            energy = round(self.detections[index][3],2)
+            if event.button.value == 1 and shift_is_held:
+                # Setup a single run safari using velocity colored data
+                print("Setting up a safari run for a velocity colored dataset")
+                self.safio.fileIn = self.safio.fileIn.replace('_mod.input', '_ss.input')
+                self.safio.setGridScat(True)
+                self.safio.NUMCHA = 1
+                self.safio.XSTART = close[0]
+                self.safio.YSTART = close[1]
+                self.safio.genInputFile(fileIn=self.safio.fileIn)
+
+                command = 'Safari.exe'
+                if platform.system() == 'Linux':
+                    command = './Safari'
+
+                sub = subprocess.run(command, shell=True)
+                close[0] = round(close[0], 2)
+                close[1] = round(close[1], 2)
+                name = self.safio.fileIn.replace('.input', '')
+                xyz_p.process_file(name + '.xyz',
+                                   name+str(close[0])+','+str(close[1])+'.xyz', color="velocity", load_vmd=True)
+                print(sub)
+
+            close[0] = round(close[0], 5)
+            close[1] = round(close[1], 5)
+            energy = round(self.detections[index][3], 2)
             text.set_text(str(close)+', '+str(energy)+'eV')
             self.p.set_xdata([close[0]])
             self.p.set_ydata([close[1]])
             fig.canvas.draw()
 
+        def on_key_press(event):
+            if event.key == 'shift':
+                global shift_is_held
+                shift_is_held = True
+
+        def on_key_release(event):
+            if event.key == 'shift':
+                global shift_is_held
+                shift_is_held = False
+
+        fig.canvas.mpl_connect('key_press_event', on_key_press)
+        fig.canvas.mpl_connect('key_release_event', on_key_release)
         fig.canvas.mpl_connect('button_press_event', onclick)
         
         fig.show()

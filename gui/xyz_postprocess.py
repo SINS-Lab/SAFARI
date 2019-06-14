@@ -2,6 +2,9 @@ from xyz import XYZ
 from xyz import XYZ_Single
 import subprocess
 import os
+import time as T
+import numpy as np
+import math
 
 
 class Particle:
@@ -26,10 +29,10 @@ class Particle:
                          value[5]/value[6]]
 
 
-def isSame(p_a, p_b, dt, color_nearest_neighbors=False):
+def isSame(p_a, p_b, dt, color=""):
     if p_a == p_b:
         return True
-    if p_a.atom != p_b.atom and not color_nearest_neighbors:
+    if p_a.atom != p_b.atom and color == "":
         return False
     # always the same for the projectile Atom
     if p_a.id == 0 and p_b.id == 0:
@@ -49,7 +52,7 @@ def isSame(p_a, p_b, dt, color_nearest_neighbors=False):
     return diff <= .25
 
 
-def merge(pset1, pset2, dt, first, color_nearest_neighbors=False):
+def merge(pset1, pset2, dt, first, color=""):
     len1 = len(pset1)
     len2 = len(pset2)
     merged = False
@@ -59,7 +62,7 @@ def merge(pset1, pset2, dt, first, color_nearest_neighbors=False):
         has = False
         for j in range(len2):
             p_b = pset2[j]
-            if isSame(p_a, p_b, dt, color_nearest_neighbors=color_nearest_neighbors):
+            if isSame(p_a, p_b, dt, color=color):
                 has = True
                 if not first:
                     break
@@ -72,7 +75,7 @@ def merge(pset1, pset2, dt, first, color_nearest_neighbors=False):
                     Particle.nextid = Particle.nextid + 1
 
         if not has:
-            if color_nearest_neighbors:
+            if color == "nearest":
                 p_a.atom = "X"
             pset2.append(p_a)
             merged = True
@@ -178,16 +181,10 @@ def smooth_framerate(times, particles):
     print("Begining smoothing")
     # get minimum timestep
     minimum_timestep = times[-1]
-    minimum_index = 0
     for index in range(20, len(times) - 1):
         timestep = times[index + 1] - times[index]
         if timestep < minimum_timestep:
             minimum_timestep = timestep
-            minimum_index = index
-    for index, item in enumerate(particles):
-        if len(item) != len(particles[0]):
-            print(len(item))
-            print(index)
     minimum_timestep = max(minimum_timestep, times[-1]/1000)
     new_times_array = []
     new_particles_array = []
@@ -199,8 +196,23 @@ def smooth_framerate(times, particles):
     print("Smoothing Done")
     return new_times_array, new_particles_array
 
+def get_velocity_parameters(particles):
+    helper_sum = 0
+    for state in particles:
+        for particle in state:
+            if particle.id != 0:
+                helper_sum += np.linalg.norm(particle.velocity)
+    average = helper_sum/(len(particles)*len(particles[0]) - 1)
+    helper_sum = 0
+    for state in particles:
+        for particle in state:
+            if particle.id != 0:
+                helper_sum += (average - np.linalg.norm(particle.velocity))**2
+    variation_average = helper_sum/(len(particles)*len(particles[0]) - 1)
+    print(math.sqrt(variation_average))
+    return average, math.sqrt(variation_average)
 
-def process(xyz, color_nearest_neighbors=False):
+def process(xyz, color=""):
     # Array of elapsed times
     times = []
     # This is an array of arrays of Particles, which correspond to times
@@ -229,7 +241,7 @@ def process(xyz, color_nearest_neighbors=False):
             pset1 = particles[i]
             pset2 = particles[i + 1]
             dt = times[i + 1] - times[i]
-            didMerge, num = merge(pset1, pset2, dt, True, color_nearest_neighbors=color_nearest_neighbors)
+            didMerge, num = merge(pset1, pset2, dt, True, color=color)
             n = n + num
             merged = merged or didMerge
         if n == 0:
@@ -240,7 +252,7 @@ def process(xyz, color_nearest_neighbors=False):
             pset1 = particles[i]
             pset2 = particles[i - 1]
             dt = times[i - 1] - times[i]
-            didMerge, num = merge(pset1, pset2, dt, False, color_nearest_neighbors=color_nearest_neighbors)
+            didMerge, num = merge(pset1, pset2, dt, False, color=color)
             n = n + num
             merged = merged or didMerge
         print('Merged '+str(n))
@@ -248,9 +260,16 @@ def process(xyz, color_nearest_neighbors=False):
     print('Finished Merging')
 
     for pset in particles:
-        def key(p):
-            return p.id
-        pset.sort(key=key)
+        # I put a lambda function in here
+        pset.sort(key=lambda p: p.id)
+
+    if color == "velocity":
+        mean, std = get_velocity_parameters(particles)
+        for state in particles:
+            for atom in state:
+                if np.linalg.norm(atom.velocity) - mean > std and atom.id != 0:
+                    atom.atom = "X"
+
     # Smooth the framerate
     times, particles = smooth_framerate(times, particles)
     xyz = XYZ()
@@ -262,27 +281,35 @@ def process(xyz, color_nearest_neighbors=False):
     return xyz
 
 
-def process_file(fileIn, fileOut=None, color_nearest_neighbors=False, load_vmd=False):
+def process_file(fileIn, fileOut=None, color="", load_vmd=False):
+    """
+    :param color: string describing the coloring pattern. "" for uniform coloring, "nearest" for coloring of
+        nearest 10 atoms, and "momentum" to color the atoms that receive additional momentum differently
+    :param load_vmd: boolean describing whether to open vmd upon completetion (true) or not (false)
+    """
     if fileOut is None:
         fileOut = fileIn
     xyz = XYZ()
     xyz.load(fileIn)
-    xyz = process(xyz, color_nearest_neighbors=color_nearest_neighbors)
-    if color_nearest_neighbors:
-        fileOut = fileOut[:-4] + "COLORED.xyz"
+    xyz = process(xyz, color=color)
+    if color == "nearest":
+        fileOut = fileOut[:-4] + "COLOREDNear.xyz"
+    elif color == "velocity":
+        fileOut = fileOut[:-4] + "COLOREDVel.xyz"
     xyz.save(fileOut)
     if load_vmd:
         # MAKE THE FILENAME INCLUDE DIRECTORY
-        if color_nearest_neighbors:
+        if color != "":
             commands = ["topo readvarxyz {}\n".format(fileOut)]
         else:
             commands = ["mol new {}\n".format(fileOut)]
         commands.append("mol modstyle 0 0 \"VDW\"")
-        try :
+        try:
             with open("commands.vmd", "w") as file:
                 file.writelines(commands)
-            os.system("vmd -e {}".format("commands.vmd"))
+            subprocess.Popen(["vmd", "-e", "commands.vmd"])
         finally:
+            T.sleep(5)
             os.remove("commands.vmd")
 
 
