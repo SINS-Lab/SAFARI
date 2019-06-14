@@ -276,7 +276,7 @@ class Detector:
         y = self.detections[..., 1]
         c = self.detections[..., 3]
         
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(8.0, 6.0))
         patches = []
         colours = []
         
@@ -320,6 +320,7 @@ class Detector:
         ax.set_title("Detections: "+str(len(x)))
         ax.set_xlabel('X Target (Angstroms)')
         ax.set_ylabel('Y Target (Angstroms)')
+        fig.text(0.6, 0.9, "Left Click: View Point\nDouble Left Click: Open Normal-Colored VMD\nDouble Right Click: Open Nearest-Colored VMD\nShift + Left Click: Open Velocity-Colored VMD", fontsize=9)
 
         self.p, = ax.plot(0,0,'r+')
 
@@ -383,7 +384,7 @@ class Detector:
                                    name+str(close[0])+','+str(close[1])+'.xyz', color="nearest", load_vmd=True)
                 print(sub)
 
-            if event.dblclick and event.button.value == 1 and shift_is_held:
+            if event.button.value == 1 and shift_is_held:
                 # Setup a single run safari using velocity colored data
                 print("Setting up a safari run for a velocity colored dataset")
                 self.safio.fileIn = self.safio.fileIn.replace('_mod.input', '_ss.input')
