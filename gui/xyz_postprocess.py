@@ -2,6 +2,7 @@ from xyz import XYZ
 from xyz import XYZ_Single
 import subprocess
 import os
+import time
 
 
 class Particle:
@@ -281,8 +282,9 @@ def process_file(fileIn, fileOut=None, color_nearest_neighbors=False, load_vmd=F
         try :
             with open("commands.vmd", "w") as file:
                 file.writelines(commands)
-            os.system("vmd -e {}".format("commands.vmd"))
+            subprocess.Popen("vmd -e commands.vmd")
         finally:
+            time.sleep(5)
             os.remove("commands.vmd")
 
 
