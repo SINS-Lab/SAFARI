@@ -202,13 +202,14 @@ def get_velocity_parameters(particles):
         for particle in state:
             if particle.id != 0:
                 helper_sum += np.linalg.norm(particle.velocity)
-    average = helper_sum/(len(particles)*len(particles[0] - 1))
+    average = helper_sum/(len(particles)*len(particles[0]) - 1)
     helper_sum = 0
     for state in particles:
         for particle in state:
             if particle.id != 0:
                 helper_sum += (average - np.linalg.norm(particle.velocity))**2
-    variation_average = helper_sum/(len(particles)*len(particles[0] - 1))
+    variation_average = helper_sum/(len(particles)*len(particles[0]) - 1)
+    print(math.sqrt(variation_average))
     return average, math.sqrt(variation_average)
 
 def process(xyz, color=""):
@@ -291,8 +292,10 @@ def process_file(fileIn, fileOut=None, color="", load_vmd=False):
     xyz = XYZ()
     xyz.load(fileIn)
     xyz = process(xyz, color=color)
-    if color_nearest_neighbors:
-        fileOut = fileOut[:-4] + "COLORED.xyz"
+    if color == "nearest":
+        fileOut = fileOut[:-4] + "COLOREDNear.xyz"
+    elif color == "velocity":
+        fileOut = fileOut[:-4] + "COLOREDVel.xyz"
     xyz.save(fileOut)
     if load_vmd:
         # MAKE THE FILENAME INCLUDE DIRECTORY
@@ -304,7 +307,7 @@ def process_file(fileIn, fileOut=None, color="", load_vmd=False):
         try:
             with open("commands.vmd", "w") as file:
                 file.writelines(commands)
-            subprocess.Popen("vmd -e commands.vmd")
+            subprocess.Popen(["vmd", "-e", "commands.vmd"])
         finally:
             T.sleep(5)
             os.remove("commands.vmd")
