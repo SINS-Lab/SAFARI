@@ -150,9 +150,9 @@ C           SMALLEST TIME STEP NEEDED TO KEEP ENERGY VARIATION
 C           WITHIN BOUNDS. IN ORDER TO RUN WITHOUT CHECKING THE
 C           ENERGY, MAKE A TEST RUN, FIND DELMIN, AND SET
 C           DELT0 = DELMIN.
-      INTEGER NCALLS,NSTEPS
+      INTEGER NCALLS,NSTEPS(NARRAY)
 C           STATISTICS ON INTEGRATION. SEE SCAT.
-      REAL*8 TIME
+      REAL*8 TIME(NARRAY)
 C           TIME OF FLIGHT FOR ION.
       INTEGER NPART
 C           INPUT PARAMETER. NPART ATOMS ON THE SURFACE INTERACT WITH
@@ -245,7 +245,7 @@ COMMON!!
         COMMON/MINV/MASS1,MION1
         common/projectile/qion
       COMMON/NRG/DEMAX,DEMIN,ABSERR,DELLOW,DELT0
-      COMMON/STATS/DELMIN,NCALLS,NSTEPS,TIME
+      COMMON/STATS/DELMIN,TIME,NCALLS,NSTEPS
         COMMON/SWITCH/PLOT,PLOTAT,RECOIL
         COMMON/TABLES/TDVDR2,TDIMDZ,TINDR2,RRMIN,RRSTEP,ZMIN,ZSTEP,NTAB
         COMMON/TVR2/TVR2
@@ -369,6 +369,7 @@ C FOR CHAIN CALCULATIONS AND MONTE CARLO:  REQUIRES MAXDIV.EQ.MINDIV.EQ.1
             PLOT = 11
             Fname=finput(1:linput)//'.xyz'
             open(unit=11,form='formatted',file=Fname)
+            write(*,*) "Running Single Shot"
 *           Run a single chainscat, then quit
             call chainscat(OFFX, OFFY, PX0, PY0, PZ1, NPART)
             go to 777
@@ -376,6 +377,7 @@ C FOR CHAIN CALCULATIONS AND MONTE CARLO:  REQUIRES MAXDIV.EQ.MINDIV.EQ.1
 
 C IF NWRITX AND NWRITY .EQ.666 THEN DO MONTE CARLO
          IF(NWRITX.EQ.666 .AND. NWRITY.EQ.666) THEN
+            write(*,*) "Running MonteCarlo"
             call montecarlo(OFFX, OFFY, PX0, PY0, PZ1, NPART)
 *           Do Output
             go to 777
@@ -383,18 +385,21 @@ C IF NWRITX AND NWRITY .EQ.666 THEN DO MONTE CARLO
 
 C IF NWRITX .EQ.666 and NWRITY.EQ.777 THEN DO Grid
          IF(NWRITX.EQ.666 .AND. NWRITY.EQ.777) THEN
+            write(*,*) "Running GridScat"
             call gridscat(OFFX, OFFY, PX0, PY0, PZ1, NPART)
 *           Do Output
             go to 777
          ENDIF
 
 *        Assume we want a chain calculation instead.
+         write(*,*) "Running Chainscat"
          call chainscat(OFFX, OFFY, PX0, PY0, PZ1, NPART)
 *        Do Output
          go to 777
       ENDIF
 
 *     If we got to here, it means we want to run an adaptive grid instead.
+      write(*,*) "Running Adaptive Scat"
       call adaptivescat(OFFX, OFFY)
 C  TODO move this stuff here also into adaptivescat
       WRITE(10,3533) ITOTJ

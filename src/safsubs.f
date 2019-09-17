@@ -13,9 +13,16 @@ C
       REAL*8 E,TH,PH,PX3,PY3,PZ3
       LOGICAL Image
       INTEGER TYPEAT(NPARTMAX)
-      LOGICAL STUCK,BURIED
+
+C     Stuck: Ran out of energy to escape: Results in energy = -100
+C     Buried: Went lower than buried distance: Results in energy = -200
+C     Froze: Took too many steps in computation: Results in energy = -300
 C
-      COMMON/FLAGS/STUCK,BURIED
+C     If energy is -10, then it got stuck due to image charge instead.
+
+      LOGICAL STUCK,BURIED,FROZE
+C
+      COMMON/FLAGS/STUCK,BURIED,FROZE
       COMMON/MASS/MASS,MION,TYPEAT
       COMMON/MINV/MASS1,MION1
       COMMON/IMAGE/IMAGE
@@ -25,9 +32,10 @@ C
       CALL SCAT(X,Y,Z,PX,PY,PZ,Z2,PX2,PY2,PZ2,NPART,II)
 C
 C
-      IF(STUCK.OR.BURIED) THEN
+      IF(STUCK.OR.BURIED.or.FROZE) THEN
          if(stuck) e=-100.0
          if(buried) e=-200.0
+         if(froze) e=-300.0
          TH=0.
          ph=90.0
          go to 22

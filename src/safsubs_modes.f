@@ -52,6 +52,7 @@
       common/other/z1,maxdiv,mindiv,fax,fay
       common/chain/xstart,ystart,xstep,ystep,numcha
       common/points/xtraj(narray),ytraj(narray),level(narray)
+      COMMON/STATS/DELMIN,TIME(NARRAY),NCALLS,NSTEPS(NARRAY)
       common/moment/px(narray),py(narray),pz(narray)
       common/random/seed
 
@@ -72,11 +73,13 @@
 *             Call SCATTR for this particle
               call scattr(x,y,z1,px0,py0,pz1,enrgy(j),
      &             theta(j),phi(j),px(j),py(j),pz(j),npart,j)
+*              write(*,fmt="(1x,a,i4,1x,a,i4)") "Run: ",j,
+*     &         " Steps: ",NSTEPS(j)
               level(j)=1
               area(j)=1./(n)
 707       continue
-              nber=iy
-              call output(nber+1)
+*              write(*,*) "Finished Chain ",i
+              call output(iy+1)
 808   continue
       end
 

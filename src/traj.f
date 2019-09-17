@@ -1,4 +1,4 @@
-      SUBROUTINE TRAJ(DELT,XDIST,YDIST,ZDIST,NPART,NPART0)
+      SUBROUTINE TRAJ(DELT,XDIST,YDIST,ZDIST,NPART,NPART0,IINDEX)
 C
 C THIS VERSION SUPPORTS TRAJECTORY PLOTTING.
 C
@@ -86,7 +86,7 @@ C               CHANGE IS GIVEN BY
 C                       CHANGE=(ABSERR/ERRMAX)**DEMAX
 C
 C ION STATUS.
-      LOGICAL STUCK,BURIED
+      LOGICAL STUCK,BURIED,FROZE
       REAL*8 SENRGY,BDIST
 C               STUCK IF ION TURNS BACK TOWARDS THE SURFACE.
 C               BURIED IF ION EMERGES OUT THE BACK.
@@ -112,8 +112,8 @@ C
       COMMON/MASS/MASS,MION,TYPEAT
       common/symbols/SYMION,ATSYM
        COMMON/MINV/MASS1,MION1
-      COMMON/FLAGS/STUCK,BURIED
-      COMMON/STATS/DELMIN,NCALLS,NSTEPS,TIME
+      COMMON/FLAGS/STUCK,BURIED,FROZE
+      COMMON/STATS/DELMIN,TIME(NARRAY),NCALLS,NSTEPS(NARRAY)
       COMMON/SWITCH/PLOT,PLOTAT,RECOIL
 C
       COMMON/CUTOFF/SENRGY,BDIST
@@ -248,7 +248,7 @@ CVDIR ASSUME COUNT(6)
             PZAT(I)=PZATP(I)
 50       CONTINUE
       ENDIF
-      nsteps=nsteps+1
+      nsteps(iindex)=nsteps(iindex)+1
 C
 c it will be buried if it penetrates deeper than -bdist
 c it will be stuck if , in traj, its k.e. plus potential energy falls
@@ -262,6 +262,10 @@ c below some threshold.
          BURIED=.TRUE.
          RETURN
       ENDIF
+      IF(nsteps(iindex).GT.4000) THEN
+         FROZE=.TRUE.
+         RETURN
+      ENDIF
 C
 C FIND NEW TIME STEP.
       DELT=DELT*CHANGE
@@ -272,10 +276,10 @@ C FIND NEW TIME STEP.
       ENDIF
 C
 C PLOT TRAJECTORY, IF DESIRED.
-      time=time+delt
+      time(iindex)=time(iindex)+delt
       IF(PLOT.GT.0) THEN
           write(PLOT,*) (1 + NPART0)
-          write(PLOT,*) time
+          write(PLOT,*) time(iindex)
           write(PLOT,*) SYMION,X, Y, Z, PX, PY, PZ, MION
 
           DO 55 I=1,NPART0

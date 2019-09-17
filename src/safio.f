@@ -233,12 +233,13 @@ C
       INCLUDE "params.txt"
       INTEGER*4 NN
       REAL*8 AREA(NARRAY),XTRAJ(NARRAY),YTRAJ(NARRAY),ztraj(narray)
-      REAL*8 ENRGY(NARRAY),THETA(NARRAY),PHI(NARRAY)
+      REAL*8 ENRGY(NARRAY),THETA(NARRAY),PHI(NARRAY),time(narray),delmin
       INTEGER TRJADD(4,NARRAY)
-      INTEGER LEVEL(NARRAY)
+      INTEGER LEVEL(NARRAY),nsteps(narray)
       COMMON/DETECT/AREA
       Common/Points/Xtraj,Ytraj,Level
       Common/Trajs/Enrgy,Theta,Phi,Trjadd
+      COMMON/STATS/DELMIN,TIME,NCALLS,NSTEPS
       common/ztraj/ztraj
 C
       NN=MM-1
@@ -253,7 +254,8 @@ C        Write to the undata file
          WRITE(13) Enrgy(I),Theta(I),Phi(I),Area(I)
 C        Write to the plaintext file
          WRITE(66,*)Xtraj(I),Ytraj(I),ztraj(i),"   ",
-     &   Enrgy(I),Theta(I),Phi(I),Level(I),Area(I)
+     &   Enrgy(I),Theta(I),Phi(I),Level(I),Area(I),"   ",
+     &   time(I),nsteps(I)
 100   CONTINUE
 C
       RETURN
