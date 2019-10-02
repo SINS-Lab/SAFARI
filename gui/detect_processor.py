@@ -315,7 +315,7 @@ class Detector:
         fig.colorbar(p, ax=ax)
 
         #Add selected point label
-        text = ax.text(0.05, 0.95, 'None Selected',transform=ax.transAxes)
+        text = fig.text(0.1, 0.95, 'None Selected',fontsize=9)
         
         ax.set_title("Detections: "+str(len(x)))
         ax.set_xlabel('X Target (Angstroms)')
@@ -341,7 +341,7 @@ class Detector:
                     close[1] = y[i]
                     index = i
 
-            if event.dblclick and event.button.value == 1 and not shift_is_held:
+            if event.dblclick and event.button == 1 and not shift_is_held:
                 # Setup a single run safari for this.
                 self.safio.fileIn = self.safio.fileIn.replace('_mod.input', '_ss.input')
                 self.safio.setGridScat(True)
@@ -362,7 +362,7 @@ class Detector:
                                    name+str(close[0])+','+str(close[1])+'.xyz', load_vmd=True)
                 print(sub)
 
-            if event.dblclick and event.button.value == 3:
+            if event.dblclick and event.button == 3:
                 # Setup a single run safari using nearness colored data
                 print("Setting up a safari run for a nearness colored dataset")
                 self.safio.fileIn = self.safio.fileIn.replace('_mod.input', '_ss.input')
@@ -384,7 +384,7 @@ class Detector:
                                    name+str(close[0])+','+str(close[1])+'.xyz', color="nearest", load_vmd=True)
                 print(sub)
 
-            if event.button.value == 1 and shift_is_held:
+            if event.button == 1 and shift_is_held:
                 # Setup a single run safari using velocity colored data
                 print("Setting up a safari run for a velocity colored dataset")
                 self.safio.fileIn = self.safio.fileIn.replace('_mod.input', '_ss.input')
@@ -409,7 +409,10 @@ class Detector:
             close[0] = round(close[0], 5)
             close[1] = round(close[1], 5)
             energy = round(self.detections[index][3], 2)
-            text.set_text(str(close)+', '+str(energy)+'eV')
+            if self.E_over_E0:    
+                text.set_text(str(close)+', '+str(energy))
+            else:
+                text.set_text(str(close)+', '+str(energy)+'eV')
             self.p.set_xdata([close[0]])
             self.p.set_ydata([close[1]])
             fig.canvas.draw()

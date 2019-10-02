@@ -5,6 +5,7 @@ import os
 import math
 import time
 import numpy as np
+import argparse
 #if you utilize the following two lines you will be able to run 
 #the figures in here. This requires changing the backend of the fig.show()
 #for more backend choices please see https://matplotlib.org/tutorials/introductory/usage.html#what-is-a-backend
@@ -23,6 +24,7 @@ class Spectrum(detect.Spectrum):
 
     def __init__(self):
         super().__init__()
+        self.popup = None
         
     def detectorSelection(self):
         '''This makes the dropdown menu for detectors.'''
@@ -333,20 +335,19 @@ def addDropdownItems(dropdown, directory, subdirectories):
         if subdirectories and os.path.isdir(newDir):
             addDropdownItems(dropdown, newDir, True)
    
-def fileSelection():
+def fileSelection(directory='.'):
     dropdown = QComboBox()
-    directory = '.'
     addDropdownItems(dropdown, directory, True)
     return dropdown
         
-def run(spectrum):
+def run(spectrum, directory='.'):
     app = QApplication([])
     window = QWidget()
     layout = QGridLayout()
     app.spectrums = []
     sublayout = QHBoxLayout()
     label = QLabel('input file name')
-    filebox = fileSelection()
+    filebox = fileSelection(directory)
     
     sublayout.addWidget(label)
     sublayout.addWidget(filebox)
@@ -377,7 +378,7 @@ def run(spectrum):
                 file = file + '.input'
             spectrum.safio = safari_input.SafariInput(file)
             spectrum.run(data)
-            spectrum.popup.setWindowTitle(filename)
+            spectrum.popup.setWindowTitle(file)
         except Exception as e:
             print(e)
             pass
@@ -409,7 +410,7 @@ def run(spectrum):
                     file = file + '.input'
                 spectrum.safio = safari_input.SafariInput(file)
                 spectrum.run(data)
-                spectrum.popup.setWindowTitle(filename)
+                spectrum.popup.setWindowTitle(file)
             except Exception as e:
                 print(e)
                 pass
@@ -444,5 +445,11 @@ def run(spectrum):
     app.exec_()
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-d", "--directory", help="Directory to run from")
+    args = parser.parse_args()
+    directory = '.' 
+    if args.directory:
+        directory = args.directory
     spectrum = Spectrum()
-    run(spectrum)
+    run(spectrum, directory)

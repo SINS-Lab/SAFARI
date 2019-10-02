@@ -26,7 +26,7 @@ def clearDuplicates(crystal):
             break
     if d != 0:
         print(str(d)+' Dupes found.')
-        clearDuplicates(crystal)
+        #clearDuplicates(crystal)
 
 def clearOutOfBounds(crystal, xmin, xmax, ymin, ymax):
     culled = []
@@ -172,8 +172,8 @@ def gen(_size, _dir, _axis, _basis, _n, zTop, zBottom):
 if __name__ == '__main__':
     size = 4.0786
     dir = [0,0,1]
-    axis = [7,8,8]
+    axis = [1,1,1]
     atom = basisgen.Atom(196.967,79)
     crystal = gen(size, dir, axis, basisgen.fccBasis(atom), 6, 0.1, -1.8*size)
-    n = 3.9
+    n = 2.9
     clearOutOfBounds(crystal, -size * n, size * n, -size * n, size * n)

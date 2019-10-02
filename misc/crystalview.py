@@ -5,6 +5,7 @@ from pygame.locals import *
 import crystalgen
 import basisgen
 import particles
+import helpers
 import numpy as np
 import math
 from PyQt5.QtWidgets import *
@@ -26,28 +27,46 @@ key_to_function = {
 class Points:
     def __init__(self):
         # These are the points that render on the screen
+        self.points = []
+        self.custom_points = []
+
+        self.printed = False
         self.points_render = np.zeros((0,4))
-        self.points_other  = np.zeros((0,4))
+
         self.colour = (255,255,125)
-        self.colour_other = (55,55,55)
+        self.colour_custom = (255,55,0)
+        
         self.transform = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
     
     def update(self, particles):
         r = particles.positions
-        i = np.ones((len(r),1))
+        r = np.vstack((r, self.custom_points))
 
-        self.points_other = np.hstack((particles.r0, i))
+        i = np.ones((len(r),1))
+        
         self.points_render = np.hstack((r, i))
 
         trans = np.copy(self.transform)
         self.transform = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
         self.applyTransform(trans)
         return
+
+    def addPoint(self, point):
+        self.custom_points.append(point)
+
+    def draw(self, screen, nodeRadius):
+        num = len(self.points_render)
+        cp = num - len(self.custom_points)
+        for i in range(num):
+            point = self.points_render[i]
+            colour = self.colour;
+            if i > cp:
+                colour = self.colour_custom
+            pygame.draw.circle(screen, colour, (int(point[0]), int(point[1])), nodeRadius, 0)
     
     def applyTransform(self, matrix):
         self.transform = np.dot(self.transform, matrix)
         self.points_render = np.dot(self.points_render,matrix)
-        self.points_other = np.dot(self.points_other,matrix)
     
     def translate(self, dx=0, dy=0, dz=0):
         self.applyTransform(self.translationMatrix(dx,dy,dz))
@@ -110,6 +129,7 @@ class PointViewer:
         self.height = height
         self.background = (10,10,10)
         self.points = Points()
+        self.lines = Points()
         self.particles = particles.Particles()
         self.nodeColour = (255,255,255)
         self.nodeRadius = 4
@@ -117,8 +137,46 @@ class PointViewer:
         self.tick_step = 0.01
         self.outputfile = None
         self.load()
+        self.dir = [0,0,1]
+        self.axis = [0,0,1]
         pygame.font.init() 
         self.myfont = pygame.font.SysFont('Arial', 30)
+
+    def addRef(self, direction):
+
+        #Normalize the direction.
+        ss = math.sqrt(direction[0]**2 + direction[1]**2 + direction[2]**2);
+        direction[0]/=ss;
+        direction[1]/=ss;
+        direction[2]/=ss;
+
+        print(direction)
+
+        im = np.array(self.axis)
+        #im = np.array(direction)
+        ix = np.array(self.dir)
+        #ix = np.array(direction)
+        R = helpers.rotate(ix, im)
+        #R_inv = R#np.linalg.inv(R)
+        R_inv = np.linalg.inv(R)
+
+        ex = np.asarray(np.matmul(R_inv, np.array([1,0,0])))[0]
+        ey = np.asarray(np.matmul(R_inv, np.array([0,1,0])))[0]
+        ez = np.asarray(np.matmul(R_inv, np.array([0,0,1])))[0]
+
+        #direction = self.axis
+        #Convert the direction to the local coordinate ststem
+        tmp = [0,0,0]
+        tmp[0] = ex[0] * direction[0] + ex[1] * direction[1] + ex[2] * direction[2]
+        tmp[1] = ey[0] * direction[0] + ey[1] * direction[1] + ey[2] * direction[2]
+        tmp[2] = ez[0] * direction[0] + ez[1] * direction[1] + ez[2] * direction[2]
+
+        for i in range(10):
+            p = [0,0,0]
+            p[0] = p[0] + tmp[0]*i/1.0
+            p[1] = p[1] + tmp[1]*i/1.0
+            p[2] = p[2] + tmp[2]*i/1.0
+            self.points.addPoint(p)
 
     def tick(self):
         if self.doTick:
@@ -134,19 +192,32 @@ class PointViewer:
 
     def load(self):
         self.outputfile = open('T.output', 'w')
-        size = 4.09
-        dir = [0,0,1]
-        axis = [0,0,1]
-        atom = basisgen.Atom(107.87,47)
-        #crystalgen.gen(size, dir, axis, basisgen.fccBasis(atom), 6, 0.1, -2.5*size)
-        crystal = crystalgen.gen(size, dir, axis, basisgen.fccBasis(atom), 10, 0.1, -1.75*size)
-        n = 10
-        crystalgen.clearOutOfBounds(crystal, -size * n, size * n, -size * n, size * n)
+        size = 4.0786
+        self.dir = [0,0,1]
+        self.axis = [7,8,8]
+        atom = basisgen.Atom(196.967,79)
+        #crystal = crystalgen.gen(size, self.dir, self.axis, basisgen.fccBasis(atom), 10, 0.1, -1.75*size)
+        #n = 5
+        #crystalgen.clearOutOfBounds(crystal, -size * n, size * n, -size * n, size * n)
+
+        self.addRef([-1,-1,1])
+        self.addRef([2,-1,1])
+        self.addRef([0,1,1])
+
+
+
+        #self.addRef([-7,-8,8])
+
+        '''
+        self.addRef([1,0,0])
+        self.addRef([0,0,1])
+        self.addRef([0,1,0])#'''
         
         self.particles.coupling = False
         self.particles.steps = False
         self.particles.load('crystal.input')
         self.points.update(self.particles)
+
         self.translateAll([self.width/2,self.height/2,0])
         self.scaleAll(15)
 
@@ -189,10 +260,8 @@ class PointViewer:
 
     def display(self):
         self.screen.fill(self.background)
-        for point in self.points.points_other:
-            pygame.draw.circle(self.screen, self.points.colour_other, (int(point[0]), int(point[1])), self.nodeRadius, 0)
-        for point in self.points.points_render:
-            pygame.draw.circle(self.screen, self.points.colour, (int(point[0]), int(point[1])), self.nodeRadius, 0)
+
+        self.points.draw(self.screen, self.nodeRadius)
 
         T = math.trunc(self.particles.T() * 10000)/10000
         textsurface = self.myfont.render(str(T), False, (255, 0, 0))
