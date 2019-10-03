@@ -1,5 +1,5 @@
       SUBROUTINE HAMEQ(X,Y,Z,PX,PY,PZ,XAT,YAT,ZAT,
-     1                          PXAT,PYAT,PZAT,NPART,LCALCV)
+     1                          PXAT,PYAT,PZAT,NPART,DELT,LCALCV)
 * X,Y,Z,PX,PY,PZ are the positions and momenta of the projectile.
 * XAT, YAT, ZAT, PXAT, PYAT, PZAT are arrays of
 * positions and momenta of the lattice.
@@ -163,8 +163,16 @@ C        INCLUDE IMAGE CHARGE FORCE.
          DPX=DPX+FX
          DPY=DPY+FY
          DPZ=DPZ+FZ
-         VTOT = VTOT +VIM(X,Y,Z)
+         VTOT = VTOT + VIM(X,Y,Z)
       ENDIF
+      if (pimpar(3).gt.0) then
+C        INCLUDE Friction force
+         CALL FFRIC(X,Y,Z,VX,VY,VZ,DELT,MION,FX,FY,FZ)
+         DPX=DPX+FX
+         DPY=DPY+FY
+         DPZ=DPZ+FZ
+         VTOT = VTOT + VFRIC(X,Y,Z,VX,VY,VZ,DELT)
+      endif
 C
       RETURN
       END
@@ -386,6 +394,41 @@ C
          write(0,*) 'unacceptable value for iimpot'
          stop
       ENDIF
+      RETURN
+      END
+C
+C***********************************************************************
+C
+      SUBROUTINE FFRIC(X,Y,Z,VX,VY,VZ,DELT,MION,FX,FY,FZ)
+C
+C COMPUTE THE FORCE ON AN ION AT X,Y,Z DUE TO BULK EFFECTS BY CALLING
+C FIMCOR FOR CORRUGATED POTENTIAL OR DVIMDZ FOR FLAT POTENTIAL.
+C
+      IMPLICIT REAL*8 (A-H,O-Z)
+      REAL*8 sqr,Q
+      COMMON/POTPAR/POTPAR(30),PIMPAR(10),IPOT,IIMPOT
+C     If friction is enabled, then we use that for here.
+      Q = PIMPAR(3)
+      sqr = sqrt(2 * mion * Q * delt)
+      fx = -vx * sqr
+      fy = -vy * sqr
+      fz = -vz * sqr
+      RETURN
+      END
+C
+C***********************************************************************
+C
+      SUBROUTINE VFRIC(X,Y,Z,VX,VY,VZ,DELT)
+C
+C COMPUTE THE FORCE ON AN ION AT X,Y,Z DUE TO BULK EFFECTS BY CALLING
+C FIMCOR FOR CORRUGATED POTENTIAL OR DVIMDZ FOR FLAT POTENTIAL.
+C
+      IMPLICIT REAL*8 (A-H,O-Z)
+      REAL*8 Q,VFRIC
+      COMMON/POTPAR/POTPAR(30),PIMPAR(10),IPOT,IIMPOT
+C     If friction is enabled, then we use that for here.
+      Q = PIMPAR(3)
+      VFRIC = - Q * (vx**2 + vy**2 + vz**2) * delt
       RETURN
       END
 C
