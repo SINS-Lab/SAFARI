@@ -174,6 +174,6 @@ if __name__ == '__main__':
     dir = [0,0,1]
     axis = [1,1,1]
     atom = basisgen.Atom(196.967,79)
-    crystal = gen(size, dir, axis, basisgen.fccBasis(atom), 6, 0.1, -1.8*size)
-    n = 2.9
+    crystal = gen(size, dir, axis, basisgen.fccBasis(atom), 10, 0.1, -1.8*size)
+    n = 8.9
     clearOutOfBounds(crystal, -size * n, size * n, -size * n, size * n)

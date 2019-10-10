@@ -165,8 +165,8 @@ C        INCLUDE IMAGE CHARGE FORCE.
          DPZ=DPZ+FZ
          VTOT = VTOT + VIM(X,Y,Z)
       ENDIF
-      if (pimpar(3).gt.0) then
-C        INCLUDE Friction force
+      if (pimpar(3).gt.0.and.z.lt.0) then
+C        INCLUDE Friction force if below the surface
          CALL FFRIC(X,Y,Z,VX,VY,VZ,DELT,MION,FX,FY,FZ)
          DPX=DPX+FX
          DPY=DPY+FY
@@ -405,7 +405,7 @@ C COMPUTE THE FORCE ON AN ION AT X,Y,Z DUE TO BULK EFFECTS BY CALLING
 C FIMCOR FOR CORRUGATED POTENTIAL OR DVIMDZ FOR FLAT POTENTIAL.
 C
       IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8 sqr,Q
+      REAL*8 sqr,Q,MION
       COMMON/POTPAR/POTPAR(30),PIMPAR(10),IPOT,IIMPOT
 C     If friction is enabled, then we use that for here.
       Q = PIMPAR(3)
@@ -418,13 +418,13 @@ C     If friction is enabled, then we use that for here.
 C
 C***********************************************************************
 C
-      SUBROUTINE VFRIC(X,Y,Z,VX,VY,VZ,DELT)
+      DOUBLE PRECISION FUNCTION VFRIC(X,Y,Z,VX,VY,VZ,DELT)
 C
 C COMPUTE THE FORCE ON AN ION AT X,Y,Z DUE TO BULK EFFECTS BY CALLING
 C FIMCOR FOR CORRUGATED POTENTIAL OR DVIMDZ FOR FLAT POTENTIAL.
 C
       IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8 Q,VFRIC
+      REAL*8 Q
       COMMON/POTPAR/POTPAR(30),PIMPAR(10),IPOT,IIMPOT
 C     If friction is enabled, then we use that for here.
       Q = PIMPAR(3)
